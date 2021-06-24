@@ -1,0 +1,114 @@
+{
+    Items:[
+        {
+            Slot:0,
+            id:firework_rocket,
+            Count:1,
+            tag:{
+                display:{
+                    Name:"\"\\u00A7e\\u00A7lｐｒｇｍＴｒｏｕｂｌｅ’ｓ Ｒｏｃｋｅｔｓ\"",
+                    Lore:["\"\\u00A76\\u00A7lＦｌｙｉｎｇ Ｆａｓｈｉｏｎａｂｌｙ\""]
+                },
+                HideFlags:127,
+                Enchantments:[{id:0,lvl:0}],
+                Fireworks:{
+                    Flight:1,
+                    Explosions:[
+                        {
+                            Type:2,
+                            Flicker:1,
+                            Trail:1,
+                            Colors:[I;0,16776960],
+                            FadeColors:[I;0,16776960]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            Slot:1,
+            id:elytra,
+            tag:{
+                display:{
+                    Name:"\"\\u00A7e\\u00A7lｐｒｇｍＴｒｏｕｂｌｅ’ｓ Ｅｌｙｔｒａ\"",
+                    Lore:["\"\\u00A76\\u00A7lＦｌｙｉｎｇ Ｆａｓｈｉｏｎａｂｌｙ．\""]
+                },
+                HideFlags:1,
+                Enchantments:[{id:0,lvl:0}]
+            },
+            Count:1
+        },
+        {
+            Slot:2,
+            id:splash_potion,
+            Count:1,
+            tag:{
+                CustomPotionColor:8355712,
+                CustomPotionEffects:[
+                    {
+                        Id:6,
+                        Amplifier:125
+                    }
+                ],
+                display:{
+                    Name:"\"\\u00A74ＤＩＥ\"",
+                    Lore:["\"\\u00A7cＩｎｓｔａｎｔ Ｄｅａｔｈ\""]
+                },
+                HideFlags:127,
+                Enchantments:[{id:0,lvl:0}]
+            }
+        },
+        {
+            Slot:3,
+            id:redstone,
+            tag:{
+                display:{
+                    Name:"\"\\u00A7d\\u00A7lＧｅｎｅｒｉｃ Ｉｔｅｍ\"",
+                    Lore:["\"\\u00A7c\\u00A7lＡ ｇｅｎｅｒｉｃ ｉｔｅｍ．\""]
+                },
+                HideFlags:1,
+                Enchantments:[{id:0,lvl:0}]
+            },
+            Count:1
+        },
+        {
+            Slot:4,
+            id:glowstone_dust,
+            tag:{
+                display:{
+                    Name:"\"\\u00A7d\\u00A7lＧｅｎｅｒｉｃ Ｉｔｅｍ\"",
+                    Lore:["\"\\u00A7c\\u00A7lＡ ｇｅｎｅｒｉｃ ｉｔｅｍ．\""]
+                },
+                HideFlags:1,
+                Enchantments:[{id:0,lvl:0}]
+            },
+            Count:1
+        },
+        {
+            Slot:5,
+            id:gunpowder,
+            tag:{
+                display:{
+                    Name:"\"\\u00A7d\\u00A7lＧｅｎｅｒｉｃ Ｉｔｅｍ\"",
+                    Lore:["\"\\u00A7c\\u00A7lＡ ｇｅｎｅｒｉｃ ｉｔｅｍ．\""]
+                },
+                HideFlags:1,
+                Enchantments:[{id:0,lvl:0}]
+            },
+            Count:1
+        },
+        {
+            Slot:6,
+            id:ender_pearl,
+            tag:{
+                display:{
+                    Name:"\"\\u00A7d\\u00A7lＧｅｎｅｒｉｃ Ｉｔｅｍ\"",
+                    Lore:["\"\\u00A7c\\u00A7lＡ ｇｅｎｅｒｉｃ ｉｔｅｍ．\""]
+                },
+                HideFlags:1,
+                Enchantments:[{id:0,lvl:0}]
+            },
+            Count:1
+        }
+    ]
+}
