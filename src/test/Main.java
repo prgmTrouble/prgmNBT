@@ -2,9 +2,9 @@ package test;
 
 import static settings.Settings.version;
 
+import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import java.io.File;
@@ -54,72 +54,8 @@ public class Main {
     static NBTObject v17w16a_bin() {return readBin(Version.v17w16a,"1.12.nbt",true);}
     static NBTObject v19w08a_bin() {return readBin(Version.v19w08a,"1.16.dat_old",true);}
     
-    static void fill(final Container<Integer> container,int start,final int end) {
-        do container.push(start);
-        while(++start != end);
-    }
-    static final int KERNEL = 1 << 16;
-    static Container<Integer> container() {return new Queue<>();}
-    static Container<Integer> make(final int size) {
-        final Queue<Container<Integer>> qs;
-        {
-            final ExecutorService taskPool;
-            {
-                final int fullGroups = size / KERNEL;
-                taskPool = Executors.newFixedThreadPool(
-                    Math.min(fullGroups,Runtime.getRuntime().availableProcessors())
-                );
-                qs = new Queue<>();
-                int start = 0;
-                for(int i = 0;i < fullGroups;++i) {
-                    final Container<Integer> c = container();
-                    qs.push(c);
-                    final int _start = start,end = _start + KERNEL;
-                    taskPool.execute(() -> fill(c,_start,end));
-                    start = end;
-                }
-                {
-                    final int fs = size % KERNEL;
-                    if(fs != 0) {
-                        final Container<Integer> c = container();
-                        qs.push(c);
-                        final int _start = start;
-                        taskPool.execute(() -> fill(c,_start,size));
-                    }
-                }
-            }
-            taskPool.shutdown();
-            try {taskPool.awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS);}
-            catch(final InterruptedException e) {e.printStackTrace();}
-        }
-        final Container<Integer> out = qs.pop();
-        while(!qs.empty()) out.merge(qs.pop());
-        return out;
-    }
-    static volatile Integer[] garbage;
-    static final int BATCH = 10;
-    static long test(final Container<Integer> container,final int chunkSize) {
-        System.out.printf("testing %10d:",chunkSize);
-        System.gc();
-        final long t0 = System.nanoTime();
-        for(int i = 0;i < BATCH;++i)
-            garbage = container.parallelToArray(chunkSize);
-        final long t1 = System.nanoTime();
-        final long time = t1 - t0;
-        System.out.printf(" %10d\n",time);
-        return time;
-    }
-    static final int SIZE = Integer.MAX_VALUE / 60;
-    static void test(final int size,final int offset) {
-        final Container<Integer> container = make(SIZE);
-        test(container,offset - size);
-        test(container,offset);
-        test(container,offset + size);
-    }
     public static void main(String[] args) throws NBTParsingException {
-        final int factor = 8;
-        System.out.println("Size: "+SIZE); //TODO test to ensure that all elements are in array
-        test(Integer.MAX_VALUE / (1 << (1 + factor)),Integer.MAX_VALUE / (1 << factor));
+        
     }
     
 }
