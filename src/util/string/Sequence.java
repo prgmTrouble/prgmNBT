@@ -10,7 +10,6 @@ import nbt.value.collection.NBTPrimitiveArray;
 import nbt.value.collection.NBTTag;
 import util.container.ArrayUtils;
 import util.container.Container;
-import util.container.NodeIterator;
 import util.container.Queue;
 import util.container.Stack;
 
@@ -636,18 +635,10 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
     public static char[] merge(final Container<Sequence> sequences) {
         final char[] out;
         int ts = 0;
-        for(
-            final NodeIterator<Sequence> i = sequences.iterator();
-            i.hasNext();
-            ts += i.next().length()
-        );
+        for(final Sequence s : sequences) ts += s.length();
         out = new char[ts];
         ts = 0;
-        for(
-            final NodeIterator<Sequence> i = sequences.iterator();
-            i.hasNext();
-            ts = i.next().copyInto(out,ts)
-        );
+        for(final Sequence s : sequences) ts = s.copyInto(out,ts);
         return out;
     }
     /**

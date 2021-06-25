@@ -1,12 +1,21 @@
 package util.container;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import java.lang.reflect.Array;
+
 /**
  * A lightweight singly-linked list implementation.
  * 
  * @author prgmTrouble 
  * @author AzureTriple
  */
-public abstract class Container<V> {
+public abstract class Container<V> implements Iterable<V> {
     protected Node<V> h = null,t = null;
     protected int size = 0;
     
@@ -93,6 +102,7 @@ public abstract class Container<V> {
     }
     
     /**@return A {@linkplain NodeIterator}*/
+    @Override
     public NodeIterator<V> iterator() {return new NodeIterator<>(h);}
     
     @Override public abstract Container<V> clone();
@@ -106,4 +116,143 @@ public abstract class Container<V> {
         }
         return c;
     }
+    
+    @SuppressWarnings("unchecked")
+    private V[] createArr(final Class<?> cls) {return (V[])Array.newInstance(cls,size);}
+    private V[] infer() {
+        if(empty())
+            throw new NullPointerException(
+                "Failed to create a generic array: No template array provided " +
+                "and this container is empty."
+            );
+        return createArr(h.v.getClass());
+    }
+    private V[] ensure(final V[] arr) {
+        return arr != null? arr.length == size? arr
+                                              : createArr(arr.getClass().componentType())
+                          : infer();
+    }
+    public V[] toArray() {
+        final V[] arr = infer();
+        unsafeToArray(arr);
+        return arr;
+    }
+    public V[] toArray(V[] arr) {
+        arr = ensure(arr);
+        unsafeToArray(arr);
+        return arr;
+    }
+    private void unsafeToArray(final V[] arr) {
+        int i = 0;
+        for(Node<V> n = h;n != null;++i,n = n.n) arr[i] = n.v;
+    }
+    private void unsafeToArray(final V[] arr,Node<V> cursor,int start,final int end) {
+        final int _s = start;
+        try {
+        do {
+            arr[start] = cursor.v;
+            cursor = cursor.n;
+        } while(++start != end);
+        } catch(NullPointerException e) {
+            throw new ArrayIndexOutOfBoundsException("idx: "+start+",start: "+_s+",end: "+end);
+        }
+    }
+    private void chkChunk(final int chunkSize) {
+        if(chunkSize < 1)
+            throw new IllegalArgumentException(
+                "Chunk size '%d%' is less than one."
+                .formatted(chunkSize)
+            );
+    }
+    public V[] parallelToArray(final int chunkSize) {
+        chkChunk(chunkSize);
+        final V[] arr = infer();
+        unsafePtA(chunkSize,arr);
+        return arr;
+    }
+    public V[] parallelToArray(final int chunkSize,V[] out) {
+        chkChunk(chunkSize);
+        out = ensure(out);
+        unsafePtA(chunkSize,out);
+        return out;
+    }
+    private void unsafePtA(final int chunk,final V[] out) {
+        final ExecutorService taskPool;
+        {
+            final ExecutorService jumpThread;
+            {
+                Future<Node<V>> jump = new Future<>() {
+                    @Override public boolean cancel(final boolean b) {return false;}
+                    @Override public boolean isCancelled() {return false;}
+                    @Override public boolean isDone() {return true;}
+                    @Override
+                    public Node<V> get() throws InterruptedException,ExecutionException {return h;}
+                    @Override
+                    public Node<V> get(final long l,final TimeUnit t) throws InterruptedException,
+                    ExecutionException,
+                    TimeoutException {return h;}
+                };
+                jumpThread = Executors.newSingleThreadExecutor();
+                final int _size = size; // Prevent concurrency issues.
+                final int fullChunks = _size / chunk;
+                taskPool = Executors.newFixedThreadPool(
+                    Math.min(
+                        Runtime.getRuntime().availableProcessors(),
+                        Math.max(
+                            1,
+                            fullChunks
+                        )
+                    )
+                );
+                try {
+                    for(int i = 0;i < fullChunks;++i) {
+                        final Node<V> current = jump.get();
+                        jump = jumpThread.submit(() -> {
+                            Node<V> cursor = current;
+                            for(int j = 0;j < chunk;++j) cursor = cursor.n;
+                            return cursor;
+                        });
+                        final int offset = i * chunk;
+                        taskPool.execute(() -> unsafeToArray(out,current,offset,offset + chunk));
+                    }
+                    jumpThread.shutdown();
+                    final int mod = _size % chunk;
+                    if(mod != 0) {
+                        final Node<V> current = jump.get();
+                        taskPool.execute(() -> unsafeToArray(out,current,_size - (_size % chunk),_size));
+                    }
+                } catch(ExecutionException|InterruptedException e) {throw new RuntimeException(e);}
+                taskPool.shutdown();
+            }
+            try {jumpThread.awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS);}
+            catch(final InterruptedException e) {throw new RuntimeException(e);}
+        }
+        try {taskPool.awaitTermination(Long.MAX_VALUE,TimeUnit.DAYS);}
+        catch(final InterruptedException e) {throw new RuntimeException(e);}
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,7 +1,10 @@
 package util.string.outline.segment;
 
+import util.string.Sequence;
+
 public abstract class Segment {
-    protected int charLimit = Integer.MAX_VALUE;
+    public static final int MAX_LIMIT = 0;
+    protected int charLimit = MAX_LIMIT; //TODO put default in settings.
     
     public abstract int size();
     public int charLimit() {return charLimit;}
@@ -10,13 +13,20 @@ public abstract class Segment {
         return this;
     }
     
-    public abstract void onExpand();
-    protected boolean shouldExpand() {return size() > charLimit();}
-    public boolean expand() {
-        if(shouldExpand()) {
-            onExpand();
-            return true;
-        }
-        return false;
+    protected boolean shouldExpand() {
+        return charLimit() != MAX_LIMIT &&
+               Integer.compareUnsigned(size(),charLimit()) > 0;
     }
+    
+    protected abstract boolean firstPass();
+    protected abstract Sequence[] secondPass();
+    //TODO
+    // first pass:
+    //     evaluate each child's first pass
+    //     determine if this sequence is expanded
+    //
+    // second pass:
+    //     apply rule for open
+    //     evaluate each child's second pass
+    //     apply rule for close
 }

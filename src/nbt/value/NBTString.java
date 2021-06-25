@@ -252,11 +252,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         // and last characters excepting the eaten escape characters.
         final char[] buf = new char[end - start - escapes.size()];
         int cursor = buf.length; // Current index in the output.
-        for(
-            final NodeIterator<Integer> itr = escapes.iterator();
-            itr.hasNext();
-        ) {
-            final int nxt = itr.next();
+        for(final int nxt : escapes) {
             // Copy the region between the two eaten escapes.
             parent.subSequence(nxt,end).copyInto(buf,cursor -= end - nxt);
             end = nxt - 1;

@@ -1,7 +1,6 @@
 package util.string;
 
 import util.container.Container;
-import util.container.NodeIterator;
 import util.container.Queue;
 
 public class SequenceQueue extends Queue<Sequence> implements Builder {
@@ -30,14 +29,8 @@ public class SequenceQueue extends Queue<Sequence> implements Builder {
     
     @Override
     public <T extends Container<Sequence>> SequenceQueue merge(final T o) {
-        if(o instanceof SequenceQueue)
-            totalSize += ((SequenceQueue)o).totalSize;
-        else
-            for(
-                final NodeIterator<Sequence> i = o.iterator();
-                i.hasNext();
-                totalSize += i.next().length()
-            );
+        if(o instanceof SequenceQueue) totalSize += ((SequenceQueue)o).totalSize;
+        else for(final Sequence s : this) totalSize += s.length();
         return (SequenceQueue)super.merge(o);
     }
     
@@ -52,10 +45,8 @@ public class SequenceQueue extends Queue<Sequence> implements Builder {
     public Sequence concat() {
         if(empty()) return Sequence.EMPTY;
         final char[] buf = new char[totalSize];
-        final NodeIterator<Sequence> i = iterator();
         int cursor = 0;
-        do cursor = i.next().copyInto(buf,cursor);
-        while(i.hasNext());
+        for(final Sequence s : this) cursor = s.copyInto(buf,cursor);
         return new Sequence(buf);
     }
 }

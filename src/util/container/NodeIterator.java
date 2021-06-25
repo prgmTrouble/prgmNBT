@@ -1,12 +1,14 @@
 package util.container;
 
+import java.util.Iterator;
+
 /**
  * An iterator which traverses nodes in a {@linkplain Container}.
  * 
  * @author prgmTrouble 
  * @author AzureTriple
  */
-public class NodeIterator<V> {
+public class NodeIterator<V> implements Iterator<V> {
     protected Node<V> itr;
     protected NodeIterator(final Node<V> start) {itr = start;}
     

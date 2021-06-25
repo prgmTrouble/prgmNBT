@@ -11,5 +11,6 @@ public class ValueSegment extends Segment {
     
     @Override public int size() {return value.length();}
     
-    @Override public void onExpand() {}
+    @Override protected boolean firstPass() {return false;}
+    @Override protected Sequence[] secondPass() {return new Sequence[] {value};}
 }

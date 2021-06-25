@@ -19,7 +19,6 @@ import nbt.value.NBTString;
 import nbt.value.NBTValue;
 import nbt.value.ValueType;
 import util.container.Container;
-import util.container.NodeIterator;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
@@ -53,11 +52,7 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
      */
     public NBTObject(final Container<NBTTag> tags) {
         super();
-        for(
-            final NodeIterator<NBTTag> i = tags.iterator();
-            i.hasNext();
-            set(i.next())
-        );
+        for(final NBTTag tag : tags) set(tag);
     }
     /**Reads an object.*/
     public NBTObject(final DataInput in) throws IOException,NBTException {

@@ -1,7 +1,6 @@
 package util.string;
 
 import util.container.Container;
-import util.container.NodeIterator;
 import util.container.Stack;
 
 public class SequenceStack extends Stack<Sequence> implements Builder {
@@ -30,14 +29,8 @@ private int totalSize = 0;
     
     @Override
     public <T extends Container<Sequence>> SequenceStack merge(final T o) {
-        if(o instanceof SequenceStack)
-            totalSize += ((SequenceStack)o).totalSize;
-        else
-            for(
-                final NodeIterator<Sequence> i = o.iterator();
-                i.hasNext();
-                totalSize += i.next().length()
-            );
+        if(o instanceof SequenceStack) totalSize += ((SequenceStack)o).totalSize;
+        else for(final Sequence s : o) totalSize += s.length();
         return (SequenceStack)super.merge(o);
     }
     
@@ -52,12 +45,8 @@ private int totalSize = 0;
     public Sequence concat() {
         if(empty()) return Sequence.EMPTY;
         final char[] buf = new char[totalSize];
-        final NodeIterator<Sequence> i = iterator();
         int cursor = totalSize;
-        do {
-            final Sequence s = i.next();
-            s.copyInto(buf,cursor -= s.length());
-        } while(i.hasNext());
+        for(final Sequence s : this) s.copyInto(buf,cursor -= s.length());
         return new Sequence(buf);
     }
 }
