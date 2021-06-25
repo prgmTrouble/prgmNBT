@@ -47,7 +47,7 @@ public class Wrapper implements Builder {
     @Override
     public Sequence concat() {
         if(data == null || data.length() == 0) return wrapper[0].getSharedSequence();
-        return new Sequence(Sequence.merge(wrapper[0],data,wrapper[1]));
+        return Sequence.merge(wrapper[0],data,wrapper[1]);
     }
     
     /**

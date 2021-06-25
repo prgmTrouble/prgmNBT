@@ -11,6 +11,11 @@ private int totalSize = 0;
         totalSize += v.length();
         return super.push(v);
     }
+    @SuppressWarnings("unchecked") @Override
+    public SequenceStack push(final Sequence...v) {
+        if(v != null) for(final Sequence s : v) totalSize += s.length();
+        return super.push(v);
+    }
     @Override
     public Sequence pop() {
         final Sequence out = super.pop();

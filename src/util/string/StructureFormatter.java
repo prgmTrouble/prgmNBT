@@ -7,7 +7,7 @@ public class StructureFormatter implements Builder {
     public StructureFormatter(final Wrapper wrapper,
                               final Sequence separator) {
         this.wrapper = wrapper;
-        joiner = new Joiner(null,null,separator);
+        joiner = new Joiner(separator);
     }
     
     @Override

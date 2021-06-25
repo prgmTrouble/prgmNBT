@@ -1,6 +1,5 @@
 package util.string;
 
-import java.util.Collection;
 import java.util.Iterator;
 
 import nbt.value.NBTString;
@@ -9,7 +8,6 @@ import nbt.value.collection.NBTObject;
 import nbt.value.collection.NBTPrimitiveArray;
 import nbt.value.collection.NBTTag;
 import util.container.ArrayUtils;
-import util.container.Container;
 import util.container.Queue;
 import util.container.Stack;
 
@@ -614,12 +612,22 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         out[split.length] = new Sequence(split[split.length - 1],data);
         return out;
     }
+    /**Forces the input sequences to share a common buffer.*/
+    public static Sequence[] shared(final Sequence...data) {
+        if(data == null || data.length == 0) return null;
+        if(data.length == 1) return data;
+        final char[] buf = internalMerge(data);
+        for(int i = 0,j = 0;i < data.length;++i)
+            data[i] = new Sequence(j,j += data[i].length(),buf);
+        return data;
+    }
     
     /**
      * @param sequences
+     * 
      * @return The contents of all the sequences merged into one array.
      */
-    public static char[] merge(final Sequence...sequences) {
+    private static char[] internalMerge(final Sequence...sequences) {
         final char[] out;
         int ts = 0;
         for(final Sequence s : sequences) ts += s.length();
@@ -630,28 +638,22 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
     }
     /**
      * @param sequences
-     * @return The contents of all the sequences merged into one array.
+     * 
+     * @return The contents of all the sequences merged into one sequence.
      */
-    public static char[] merge(final Container<Sequence> sequences) {
-        final char[] out;
-        int ts = 0;
-        for(final Sequence s : sequences) ts += s.length();
-        out = new char[ts];
-        ts = 0;
-        for(final Sequence s : sequences) ts = s.copyInto(out,ts);
-        return out;
-    }
+    public static Sequence merge(final Sequence...sequences) {return new Sequence(internalMerge(sequences));}
     /**
      * @param sequences
+     * 
      * @return The contents of all the sequences merged into one array.
      */
-    public static char[] merge(final Collection<Sequence> sequences) {
+    public static Sequence merge(final Iterable<Sequence> sequences) {
         final char[] out;
         int ts = 0;
         for(final Sequence s : sequences) ts += s.length();
         out = new char[ts];
         ts = 0;
         for(final Sequence s : sequences) ts = s.copyInto(out,ts);
-        return out;
+        return new Sequence(out);
     }
 }

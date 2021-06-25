@@ -16,8 +16,8 @@ class WrapperTest {
     private static void match(final Wrapper w,
                               final Sequence prefix,
                               final Sequence suffix) {
-        assertEquals(new Sequence(Sequence.merge(prefix,suffix)),w.concat());
-        assertEquals(new Sequence(Sequence.merge(prefix,data,suffix)),w.push(data).concat());
+        assertEquals(Sequence.merge(prefix,suffix),w.concat());
+        assertEquals(Sequence.merge(prefix,data,suffix),w.push(data).concat());
     }
     private static final char O = '[',C = ']',S = '"';
     private static final Sequence OS = new Sequence(O),CS = new Sequence(C),SS = new Sequence(S);
@@ -41,8 +41,8 @@ class WrapperTest {
     
     @Test @Order(5)
     void testWrap() {
-        assertEquals(new Sequence(Sequence.merge(SS,SS)),Wrapper.wrap(EMPTY,S));
-        assertEquals(new Sequence(Sequence.merge(SS,data,SS)),Wrapper.wrap(data,S));
+        assertEquals(Sequence.merge(SS,SS),Wrapper.wrap(EMPTY,S));
+        assertEquals(Sequence.merge(SS,data,SS),Wrapper.wrap(data,S));
     }
     
 }

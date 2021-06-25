@@ -22,6 +22,6 @@ public class FoldingTokenSet {
         final Sequence[] out = {ol.apply(Adjacency.before,fs,token),
                                 tokens[token.ordinal()][fs.ordinal()],
                                 ol.apply(Adjacency.after,fs,token)};
-        return new Sequence(Sequence.merge(out));
+        return Sequence.merge(out);
     }
 }

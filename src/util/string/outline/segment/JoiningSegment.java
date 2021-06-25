@@ -1,7 +1,9 @@
 package util.string.outline.segment;
 
 import util.container.Queue;
+import util.string.Joiner;
 import util.string.Sequence;
+import util.string.SequenceQueue;
 
 public class JoiningSegment extends Segment {
     private Queue<Segment> children = new Queue<>();
@@ -27,10 +29,7 @@ public class JoiningSegment extends Segment {
         return this;
     }
     
-    @Override
-    public int size() {
-        return totalSize;
-    }
+    @Override public int size() {return totalSize;}
     
     @Override
     protected boolean shouldExpand() {
@@ -47,29 +46,66 @@ public class JoiningSegment extends Segment {
     @Override
     protected Sequence[] secondPass() {
         if(expand) {
-            // A sequence array holding the data for each block.
+            // The data for each block.
             final Sequence[][] data = new Sequence[children.size()][];
             {
-                // Initially set each segment to its own block.
                 int child = -1;
                 for(final Segment s : children)
                     data[++child] = s.secondPass();
             }
-            //TODO
-            // break on:
-            //     expanded child
-            //     child limit reached
-            //     character limit reached
-            
-            // Don't bother inlining if the child limit allows 1 element per block.
-            if(childLimit != 1) {
-                // Variables to keep track of the current line.
-                int charCount = 0,childCount = 0;
-                
+            final Queue<Sequence> lines = new Queue<>();
+            {
+                SequenceQueue line = new SequenceQueue();
+                {
+                    boolean notFirst = false,previousExpanded = false;
+                    final int sepSize = separator.length();
+                    int childCount = 0;
+                    for(final Sequence[] block : data) {
+                        // Push separators between blocks.
+                        if(notFirst) line.push(separator);
+                        else notFirst = true;
+                        // Force line breaks after expanded children.
+                        if(previousExpanded) {
+                            lines.push(line.concat());
+                            line = new SequenceQueue();
+                            previousExpanded = false;
+                        }
+                        // Detect line break position.
+                        if(
+                            block.length != 1 || // Expanded child.
+                            childCount == childLimit || // Child limit reached.
+                            (
+                                line.currentSize() + sepSize + block[0].length()
+                            ) >= charLimit // Character limit reached.
+                        ) {
+                            // Force a line break if the previousExpanded check
+                            // failed.
+                            if(!line.empty()) {
+                                lines.push(line.concat());
+                                line = new SequenceQueue();
+                            }
+                            // Push all lines excepting the last.
+                            if(previousExpanded = block.length != 1) {
+                                for(int i = 0;i < block.length - 1;++i)
+                                    lines.push(block[i]);
+                                // Reset child counter.
+                                childCount = 0;
+                            } else childCount = 1;
+                        } else ++childCount;
+                        // Push the remaining line.
+                        line.push(block[block.length - 1]);
+                    }
+                }
+                lines.push(line.concat());
             }
+            return Sequence.shared(lines.toArray(new Sequence[lines.size()]));
         }
-        
-        return null;
+        final Joiner line = new Joiner(separator);
+        for(final Segment s : children)
+            // Since expanded children force the parent to be expanded, there must
+            // be exactly one element in the second pass array.
+            line.push(s.secondPass()[0]);
+        return new Sequence[] {line.concat()};
     }
 }
 

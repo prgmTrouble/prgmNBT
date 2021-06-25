@@ -6,6 +6,7 @@ public abstract class Segment {
     public static final int MAX_LIMIT = 0;
     protected int charLimit = MAX_LIMIT; //TODO put default in settings.
     
+    /**@return The size of this segment if it is folded.*/
     public abstract int size();
     public int charLimit() {return charLimit;}
     public Segment charLimit(final int limit) {

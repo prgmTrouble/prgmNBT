@@ -1,12 +1,5 @@
 package util.container;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import java.lang.reflect.Array;
 
 /**
@@ -24,6 +17,10 @@ public abstract class Container<V> implements Iterable<V> {
     /**@return <code>true</code> iff the container has no elements.*/
     public boolean empty() {return h == null;}
     
+    private void pushBase(final V v) {
+        if(++size == 1) h = t = new Node<>(v);
+        else internalPush(v);
+    }
     /**
      * Adds an element to the container.
      * 
@@ -32,13 +29,27 @@ public abstract class Container<V> implements Iterable<V> {
      * @return <code>this</code>.
      */
     @SuppressWarnings("unchecked")
-    public <T extends Container<V>> T push(final V v) {
-        if(++size == 1) h = t = new Node<>(v);
-        else internalPush(v);
-        return (T)this;
+    public <C extends Container<V>> C push(final V v) {
+        pushBase(v);
+        return (C)this;
     }
     /**Internally adds an item.*/
     protected abstract void internalPush(final V v);
+    /**
+     * Pushes all elements to the container.
+     * 
+     * @param v Elements to add.
+     * 
+     * @return <code>this</code>.
+     */
+    @SuppressWarnings("unchecked")
+    public <C extends Container<V>> C push(final V...v) {
+        if(v != null && v.length != 0) {
+            pushBase(v[0]);
+            for(int i = 0;++i < v.length;internalPush(v[i]));
+        }
+        return (C)this;
+    }
     
     /**
      * Removes an element from the front of the container.
@@ -132,11 +143,28 @@ public abstract class Container<V> implements Iterable<V> {
                                               : createArr(arr.getClass().componentType())
                           : infer();
     }
+    /**
+     * @return An array containing the contents of this container.
+     * 
+     * @throws NullPointerException This container is empty.
+     * 
+     * @see #toArray(V[])
+     */
     public V[] toArray() {
         final V[] arr = infer();
         unsafeToArray(arr);
         return arr;
     }
+    /**
+     * @param arr A template array.
+     * 
+     * @return An array containing the contents of this container.
+     * 
+     * @throws NullPointerException This container is empty and the provided
+     *                              template array is <code>null</code>.
+     *                              
+     * @see #toArray()
+     */
     public V[] toArray(V[] arr) {
         arr = ensure(arr);
         unsafeToArray(arr);
@@ -147,28 +175,3 @@ public abstract class Container<V> implements Iterable<V> {
         for(Node<V> n = h;n != null;++i,n = n.n) arr[i] = n.v;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

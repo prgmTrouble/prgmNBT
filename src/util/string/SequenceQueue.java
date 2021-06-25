@@ -11,6 +11,11 @@ public class SequenceQueue extends Queue<Sequence> implements Builder {
         totalSize += v.length();
         return super.push(v);
     }
+    @SuppressWarnings("unchecked") @Override
+    public SequenceQueue push(final Sequence...v) {
+        if(v != null) for(final Sequence s : v) totalSize += s.length();
+        return super.push(v);
+    }
     @Override
     public Sequence pop() {
         final Sequence out = super.pop();
