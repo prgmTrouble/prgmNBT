@@ -1,5 +1,6 @@
 package util.string.outline;
 
+import settings.Settings;
 import util.container.Queue;
 import util.string.Joiner;
 import util.string.Sequence;
@@ -9,7 +10,7 @@ public class JoiningSegment extends Segment {
     private Queue<Segment> children = new Queue<>();
     private final Sequence separator;
     private int totalSize = 0;
-    private int childLimit = MAX_LIMIT; //TODO put default in settings
+    private int childLimit = Settings.defaultFoldedChildLimit();
     
     public JoiningSegment(final Sequence separator) {
         super();

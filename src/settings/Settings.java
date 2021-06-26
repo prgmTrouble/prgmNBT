@@ -3,6 +3,7 @@ package settings;
 import gui.theme.Theme;
 import java.io.File;
 import util.string.Sequence;
+import util.string.outline.Segment;
 
 public final class Settings {
     private Settings() {}
@@ -10,18 +11,38 @@ public final class Settings {
     static Theme theme;
     static Version version;
     static boolean defaultMinimal;
-    static int maxFoldedLength;
     static Sequence defaultIndent;
+    static int defaultFoldedCharLimit;
+    static int defaultFoldedChildLimit;
+    
+    private static final File SETTINGS_LOCATION = new File(""); //TODO
+    static {
+        // Attempt to load from settings file.
+        //TODO
+        // Cannot find settings, so generate a default one.
+        generateDefault();
+    }
+    
+    private static void generateDefault() {
+        theme(Theme.DARK);
+        version(Version.v17w16a);
+        defaultMinimal(true);
+        defaultIndent(new Sequence(' ',4));
+        defaultFoldedCharLimit(Segment.MAX_LIMIT);
+        defaultFoldedChildLimit(Segment.MAX_LIMIT);
+        export(SETTINGS_LOCATION);
+    }
     
     public static void export(final File f) {
-        
+        //TODO export as json file
     }
     
     public static Theme theme() {return theme;}
     public static Version version() {return version;}
     public static boolean defaultMinimal() {return defaultMinimal;}
-    public static int maxFoldedLength() {return maxFoldedLength;}
     public static Sequence defaultIndent() {return defaultIndent;}
+    public static int defaultFoldedCharLimit() {return defaultFoldedCharLimit;}
+    public static int defaultFoldedChildLimit() {return defaultFoldedChildLimit;}
     
     private static <V> V nn(final V v,final String name) {
         if(v == null)
@@ -34,8 +55,9 @@ public final class Settings {
     public static void theme(final Theme t) {theme = nn(t,"theme");}
     public static void version(final Version v) {version = nn(v,"version");}
     public static void defaultMinimal(final boolean dm) {defaultMinimal = dm;}
-    public static void maxFoldedLength(final int fl) {maxFoldedLength = fl;}
     public static void defaultIndent(final Sequence di) {defaultIndent = nn(di,"default indent");}
+    public static void defaultFoldedCharLimit(final int dfcl) {defaultFoldedCharLimit = dfcl;}
+    public static void defaultFoldedChildLimit(final int dfcl) {defaultFoldedChildLimit = dfcl;}
 }
 
 

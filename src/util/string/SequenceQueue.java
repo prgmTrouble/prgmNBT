@@ -20,7 +20,7 @@ public class SequenceQueue extends Queue<Sequence> implements Builder {
     public Sequence pop() {
         final Sequence out = super.pop();
         totalSize -= out.length();
-        return super.pop();
+        return out;
     }
     
     /**@return The size of the sequences stored in the queue.*/

@@ -63,43 +63,9 @@ public class NBTTag extends NBT {
     
     @Override public Sequence toSequence() {return value.appendTo(key.appendTo(new Joiner(':'))).concat();}
     
-    /**
-     * Attempts to parse a tag, but will return an {@linkplain NBTString} if
-     * possible.
-     */
+    /**Strictly parses a key.*/
     public static NBT parse(final SequenceIterator i) throws NBTParsingException {
-        /* ============================== Key ============================== */
-        final NBTString key;
-        try {key = new NBTString(i);} // This method already skips whitespace.
-        catch(final NBTParsingException e) {
-            throw new NBTParsingException(
-                "Error while parsing a key for a tag.",
-                e
-            );
-        }
-        if( //TODO fix
-            //key.
-            // Blank keys are not allowed.
-            key.unwrapped().stripLeading().isEmpty() ||
-            // The key must be followed by a separator character to be a tag.
-            i.skipWS() != SEPARATOR ||
-            // Separator must be followed by something else.
-            i.nextNonWS() == null
-        ) return key; // String parsed, but was an invalid key or no value was parsed.
-        
-        /* ============================= Value ============================= */
-        final NBTValue value;
-        try {value = NBTValue.parse(i,null,false);}
-        catch(final NBTParsingException e) {
-            // Since a separator was found, any exceptions indicate that there
-            // cannot be a valid value.
-            throw new NBTParsingException(
-                "Error while parsing value for a tag with key \"%s\"".formatted(key.unwrapped()),
-                i.index(),i.getParent(),
-                e
-            );
-        }
-        return new NBTTag(key,value);
+        return new NBTTag(parseKey(i),parseValue(i));
     }
     
     public static NBTString parseKey(final SequenceIterator i) throws NBTParsingException {

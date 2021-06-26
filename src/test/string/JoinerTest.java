@@ -68,7 +68,7 @@ class JoinerTest {
     
     @Test @Order(6)
     void testJoinerSequenceArray() {
-        match4(new Joiner(OAS),OAS,EMPTY,SS);
+        match4(new Joiner(OAS,EMPTY),OAS,EMPTY,SS);
         match4(new Joiner(OAS,CAS),OAS,CAS,SS);
         match4(new Joiner(OAS,CAS,SAS),OAS,CAS,SAS);
     }
