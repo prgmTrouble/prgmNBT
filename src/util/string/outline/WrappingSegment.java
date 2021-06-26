@@ -1,4 +1,4 @@
-package util.string.outline.segment;
+package util.string.outline;
 
 import settings.Settings;
 import util.string.Sequence;

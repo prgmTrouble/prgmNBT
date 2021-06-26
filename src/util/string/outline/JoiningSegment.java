@@ -1,4 +1,4 @@
-package util.string.outline.segment;
+package util.string.outline;
 
 import util.container.Queue;
 import util.string.Joiner;
