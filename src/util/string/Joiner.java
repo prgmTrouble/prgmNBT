@@ -6,7 +6,7 @@ package util.string;
  * @author prgmTrouble 
  * @author AzureTriple
  */
-public class Joiner extends SequenceQueue { //TODO test changes
+public class Joiner extends SequenceQueue {
     /**Holds the characters which wrap and separate the elements.*/
     private final Sequence[] wrapper;
     

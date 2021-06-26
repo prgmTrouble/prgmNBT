@@ -16,6 +16,10 @@ import settings.Version;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.JoiningSegment;
+import util.string.outline.Segment;
+import util.string.outline.ValueSegment;
+import util.string.outline.WrappingSegment;
 
 /**
  * An {@linkplain NBTCollection} which holds a list of values with the same
@@ -191,6 +195,26 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
         return j.concat();
     }
     @Override protected Sequence minimal() {return super.complete();}
+    
+    @Override
+    protected WrappingSegment getWrapper() {
+        final Sequence[] wrapper = Sequence.shared(new char[] {OPEN,CLOSE},1);
+        return new WrappingSegment(wrapper[0],wrapper[1]); //TODO customization?
+    }
+    @Override
+    protected Segment getChildren() {
+        if(!THE_WILD_WEST || minimal) return super.getChildren();
+        final JoiningSegment s = new JoiningSegment(new Sequence(',')); //TODO customization?
+        int i = -1;
+        final Sequence sep = new Sequence(INDEX_SEPARATOR);
+        for(final NBTValue v : this)
+            s.push(
+                new JoiningSegment(sep) //TODO customization?
+                             .push(new ValueSegment(new Sequence(++i)))
+                             .push(v.toSegment())
+            );
+        return null;
+    }
     
     @Override public Iterator<NBTValue> iterator() {return values.iterator();}
     @Override protected NBTArray values() {return this;}

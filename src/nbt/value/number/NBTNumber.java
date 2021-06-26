@@ -10,6 +10,8 @@ import nbt.value.number.NBTFP.Delimiter;
 import settings.Version;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.Segment;
+import util.string.outline.ValueSegment;
 
 public abstract class NBTNumber extends NBTValue {
     // Access is protected to avoid null values.
@@ -52,6 +54,7 @@ public abstract class NBTNumber extends NBTValue {
     }
     
     @Override public Sequence toSequence() {return suffix() == 0 || !forceSuffix() && minimal? minimal() : complete();}
+    @Override public Segment toSegment() {return new ValueSegment(toSequence());}
     
     /**
      * Converts a numeric value to another type.

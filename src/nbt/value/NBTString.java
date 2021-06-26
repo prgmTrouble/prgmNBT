@@ -13,6 +13,8 @@ import util.container.Stack;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.Segment;
+import util.string.outline.ValueSegment;
 import util.string.Wrapper;
 
 /**
@@ -499,6 +501,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         // Must wrap if contains an un-wrappable character.
         return !minimal || forceWrap(value)? complete() : minimal();
     }
+    @Override public Segment toSegment() {return new ValueSegment(toSequence());}
     
     @Override public int compareTo(final NBTString o) {return value.compareTo(o.value);}
     public boolean equals(final Sequence s) {return value.equals(s);}

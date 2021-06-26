@@ -10,12 +10,12 @@ import nbt.value.NBTString;
 import nbt.value.NBTValue;
 import nbt.value.collection.NBTTag;
 import settings.Settings;
-import util.string.Builder;
 import util.string.Indenter;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.Stringifiable;
 
-public abstract class NBT {
+public abstract class NBT implements Stringifiable {
     /**
      * <code>true</code> if this NBT should be represented minimally, where
      * possible.
@@ -43,19 +43,7 @@ public abstract class NBT {
     /**Sets this NBT and all of its children (if any) to the specified minimalism.*/
     public void setDeepMinimal(final boolean minimal) {this.minimal = minimal;}
     
-    /**@return A representation of this NBT as a character sequence.*/
-    public abstract Sequence toSequence();
-    
     @Override public String toString() {return toSequence().toString();}
-    
-    /**
-     * Appends the string representation to the builder.
-     * 
-     * @param b {@linkplain Builder}
-     * 
-     * @return <code>b</code>
-     */
-    @SuppressWarnings("unchecked") public <B extends Builder> B appendTo(final B b) {return (B)b.push(toSequence());}
     
     /**
      * Breaks up the string representation into mutiple lines where necessary using

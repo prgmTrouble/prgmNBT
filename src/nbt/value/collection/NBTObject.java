@@ -22,6 +22,7 @@ import util.container.Container;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.WrappingSegment;
 
 public class NBTObject extends NBTCollection<NBTString,NBTTag> {
     public static final ValueType TYPE = ValueType.OBJECT;
@@ -137,6 +138,12 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
         final Joiner j = getJoiner();
         for(final NBT nbt : this) if(!nbt.isDefault()) nbt.appendTo(j);
         return j.concat();
+    }
+    
+    @Override
+    protected WrappingSegment getWrapper() {
+        final Sequence[] wrapper = Sequence.shared(new char[] {OPEN,CLOSE},1);
+        return new WrappingSegment(wrapper[0],wrapper[1]); //TODO customization?
     }
     
     /**

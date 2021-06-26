@@ -10,6 +10,9 @@ import settings.Version;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.JoiningSegment;
+import util.string.outline.Segment;
+import util.string.outline.WrappingSegment;
 
 /**
  * An {@linkplain NBTValue} which holds other {@linkplain NBT}s.
@@ -51,6 +54,8 @@ public abstract class NBTCollection<K,V extends NBT> extends NBTValue implements
     
     /**Gets a {@linkplain Joiner} instance to use when converting to a character sequence.*/
     protected abstract Joiner getJoiner();
+    /**Gets a {@linkplain WrappingSegment} instance to use when converting to an outline.*/
+    protected abstract WrappingSegment getWrapper();
     
     protected abstract Iterable<NBTValue> values();
     
@@ -60,6 +65,14 @@ public abstract class NBTCollection<K,V extends NBT> extends NBTValue implements
         for(final V nbt : this) nbt.appendTo(j);
         return j.concat();
     }
+    
+    /**@return A segment containing the children in a stringified form.*/
+    protected Segment getChildren() {
+        final JoiningSegment s = new JoiningSegment(new Sequence(',')); //TODO customization?
+        for(final NBT n : this) s.push(n.toSegment());
+        return s;
+    }
+    @Override public Segment toSegment() {return getWrapper().child(getChildren());}
     
     @Override
     public boolean isDefault() {

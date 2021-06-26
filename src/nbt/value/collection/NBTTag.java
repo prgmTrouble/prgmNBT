@@ -13,6 +13,8 @@ import settings.Version;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.JoiningSegment;
+import util.string.outline.Segment;
 
 public class NBTTag extends NBT {
     public static final char SEPARATOR = ':';
@@ -62,6 +64,12 @@ public class NBTTag extends NBT {
     }
     
     @Override public Sequence toSequence() {return value.appendTo(key.appendTo(new Joiner(':'))).concat();}
+    @Override
+    public Segment toSegment() {//TODO customization?
+        return new JoiningSegment(new Sequence(SEPARATOR))
+                            .push(key.toSegment())
+                            .push(value.toSegment());
+    }
     
     /**Strictly parses a key.*/
     public static NBT parse(final SequenceIterator i) throws NBTParsingException {
