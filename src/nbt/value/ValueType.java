@@ -63,8 +63,7 @@ public enum ValueType {
      * @param value  Value to convert.
      * @param target Type of conversion result.
      * 
-     * @return The converted value, or <code>null</code> iff no possible conversion
-     *         was found.
+     * @return The converted value.
      */
     public static NBTValue convert(final NBTValue value,
                                    final ValueType target)
@@ -124,20 +123,3 @@ public enum ValueType {
         return v.read(in);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

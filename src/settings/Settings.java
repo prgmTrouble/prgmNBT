@@ -14,6 +14,8 @@ public final class Settings {
     static Sequence defaultIndent;
     static int defaultFoldedCharLimit;
     static int defaultFoldedChildLimit;
+    static int exceptionCharacterLimit;
+    static boolean escapeUnicodeByDefault;
     
     private static final File SETTINGS_LOCATION = new File(""); //TODO
     static {
@@ -31,6 +33,8 @@ public final class Settings {
         defaultFoldedCharLimit(Segment.MAX_LIMIT);
         defaultFoldedChildLimit(Segment.MAX_LIMIT);
         export(SETTINGS_LOCATION);
+        exceptionCharacterLimit(50);
+        escapeUnicodeByDefault(true);
     }
     
     public static void export(final File f) {
@@ -43,6 +47,8 @@ public final class Settings {
     public static Sequence defaultIndent() {return defaultIndent;}
     public static int defaultFoldedCharLimit() {return defaultFoldedCharLimit;}
     public static int defaultFoldedChildLimit() {return defaultFoldedChildLimit;}
+    public static int exceptionCharacterLimit() {return exceptionCharacterLimit;}
+    public static boolean escapeUnicodeByDefault() {return escapeUnicodeByDefault;}
     
     private static <V> V nn(final V v,final String name) {
         if(v == null)
@@ -58,6 +64,8 @@ public final class Settings {
     public static void defaultIndent(final Sequence di) {defaultIndent = nn(di,"default indent");}
     public static void defaultFoldedCharLimit(final int dfcl) {defaultFoldedCharLimit = dfcl;}
     public static void defaultFoldedChildLimit(final int dfcl) {defaultFoldedChildLimit = dfcl;}
+    public static void exceptionCharacterLimit(final int ecl) {exceptionCharacterLimit = ecl;}
+    public static void escapeUnicodeByDefault(final boolean eubd) {escapeUnicodeByDefault = eubd;}
 }
 
 

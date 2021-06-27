@@ -33,11 +33,14 @@ public abstract class NBTValue extends NBT {
     /**@return A representation of this NBT as a character sequence.*/
     public Sequence toSequence() {return minimal? minimal() : complete();}
     
-    /**Gets the {@linkplain ValueType} associated with this NBT value.*/
+    /**@return The {@linkplain ValueType} associated with this NBT value.*/
     public abstract ValueType type();
     
     /**@see ValueType#convert(NBTValue,ValueType)*/
-    public NBTValue convertTo(final ValueType type) throws NBTConversionException {return ValueType.convert(this,type);}
+    public NBTValue convertTo(final ValueType type)
+                              throws NBTConversionException {
+        return ValueType.convert(this,type);
+    }
     
     /**
      * Uses the iterator to parse the next value. The iterator's position following
@@ -100,23 +103,3 @@ public abstract class NBTValue extends NBT {
         };
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

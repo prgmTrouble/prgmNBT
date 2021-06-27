@@ -13,9 +13,9 @@ import util.container.Stack;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.Wrapper;
 import util.string.outline.Segment;
 import util.string.outline.ValueSegment;
-import util.string.Wrapper;
 
 /**
  * A {@linkplain NBTValue} holding a string.
@@ -122,7 +122,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * 
      * @see {@linkplain NBTValue#NBTValue()}
      */
-    public NBTString(final String value) {super(); this.value = new Sequence(value);}
+    public NBTString(final String value) throws NBTParsingException {super(); setValue(value);}
     /**
      * Creates a string value.
      * 
@@ -145,7 +145,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         value = eatSequence(i,null);
         // Determine if string is wrapped.
         if(!(minimal = !(value.isWrappedIn('"') || SINGLE_QUOTES_ENABLED && value.isWrappedIn('\''))))
-            value = value.unwrap();
+            value = value.unwrapAndUnescape(); //TODO test change
     }
     
     public NBTString setQuoteStyle(final boolean single) {
@@ -157,7 +157,6 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         if(value == null) throw new NullPointerException("Cannot assign a null value.");
         return value;
     }
-    private static final char toHexChar(int c) {return (char)((c &= 0xF) > 9? c - 10 + 'A' : ('0' + c));}
     
     private static Sequence eatWildWestSequence(final SequenceIterator i,
                                                 final char wrapper,
@@ -263,8 +262,9 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         parent.subSequence(start,end).copyInto(buf,0);
         return new Sequence(buf);
     }
-    public static Sequence eatSequence(final SequenceIterator i,
-                                       final Character terminator) throws NBTParsingException {
+    private static Sequence eatSequence(final SequenceIterator i,
+                                        final Character terminator)
+                                        throws NBTParsingException {
         final Character wrapper = i.skipWS();
         if(wrapper == null) {
             // Before 17w16a, empty sequences are allowed to be strings.
@@ -276,8 +276,6 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         if(isStringWrapper(wrapper)) {
             if(!i.hasNext()) // Ensure that there are more characters.
                 throw new NBTParsingException("Missing ending quote",i);
-            // Advance past the quote
-            //i.next();
             final Stack<Integer> chars,indices;
             if(UNICODE_ENABLED && ESCAPE_UNICODE) {chars = new Stack<>(); indices = new Stack<>();}
             else chars = indices = null;
@@ -312,7 +310,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
                             .formatted(c,(int)c),i
                         );
                         escaped = false;
-                    } else if(!isPrintable(c)/*c < ' '*/ || c == '\u00A7' || c == '\u007F')
+                    } else if(!isPrintable(c) || c == '\u00A7' || c == '\u007F')
                         // For whatever reason, all printable characters EXCEPT the section symbol
                         // are allowed. Presumably, this is because the section symbol is used as
                         // a formatting flag for the text renderer. However, I have no idea why its
@@ -355,10 +353,10 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
                 {
                     // Convert the character into hexadecimal.
                     int v = c.next();
-                    buf[--cursor] = toHexChar(v);
-                    buf[--cursor] = toHexChar(v >>>= 4);
-                    buf[--cursor] = toHexChar(v >>>= 4);
-                    buf[--cursor] = toHexChar(v >>>  4);
+                    buf[--cursor] = Sequence.toHexChar(v);
+                    buf[--cursor] = Sequence.toHexChar(v >>>= 4);
+                    buf[--cursor] = Sequence.toHexChar(v >>>= 4);
+                    buf[--cursor] = Sequence.toHexChar(v >>>  4);
                 }
                 // Add the prefix.
                 buf[--cursor] = 'u';
@@ -380,9 +378,9 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         final SequenceIterator i = value.iterator();
         value = eatSequence(i,null);
         if(i.hasNext()) throw new NBTParsingException("Trailing data found",i);
-        if(value.isWrappedIn('"') || SINGLE_QUOTES_ENABLED && value.isWrappedIn('\''))
-            value = value.unwrap();
-        return value;
+        return value.isWrappedIn('"') || SINGLE_QUOTES_ENABLED && value.isWrappedIn('\'')
+            ? value.unwrapAndUnescape()
+            : value;
     }
     
     public NBTString setValue(final Sequence value) throws NBTParsingException {
@@ -517,26 +515,6 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
     }
     @Override public int hashCode() {return value.hashCode();}
     
-    /**@return The same string, but unwrapped.*/
-    private static Sequence unEscape(final Sequence s) {
-        final char[] buf = new char[s.length()],out;
-        {
-            boolean escaped = false;
-            int i = -1;
-            for(final char c : s) {
-                if(!escaped) {if(escaped = c == '\\') continue;}
-                else escaped = false;
-                // This character only gets copied if the character
-                // was escaped or not an escape character.
-                buf[++i] = c;
-            }
-            if(i < 3) return EMPTY;
-            // (i-1) is the number of characters excluding the wrapper.
-            out = new char[i - 1];
-        }
-        System.arraycopy(buf,1,out,0,out.length);
-        return new Sequence(out);
-    }
     /**
      * @param i          A {@linkplain SequenceIterator} which points to the
      *                   position just before the string sequence.
@@ -560,24 +538,8 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         // Bypass constructor checks.
         final NBTString s = new NBTString();
         s.value = str.isWrappedIn('"') || SINGLE_QUOTES_ENABLED && str.isWrappedIn('\'')
-                ? unEscape(str)
+                ? str.unwrapAndUnescape() //TODO test change
                 : str;
         return s;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

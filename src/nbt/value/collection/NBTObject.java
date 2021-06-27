@@ -108,16 +108,18 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
     public NBTObject set(final Sequence key,final NBTValue element) throws NBTParsingException {
         return set(new NBTString(key),element);
     }
-    public NBTObject set(final String key,final NBTValue element) {return set(new NBTString(key),element);}
+    public NBTObject set(final String key,final NBTValue element) throws NBTParsingException {
+        return set(new NBTString(key),element);
+    }
     public NBTObject set(final NBTTag entry) {values.put(entry.key,entry.value); return this;}
     
     @Override public NBTValue get(final NBTString key) {return values.get(key);}
     public NBTValue get(final Sequence key) throws NBTParsingException {return values.get(new NBTString(key));}
-    public NBTValue get(final String key) {return values.get(new NBTString(key));}
+    public NBTValue get(final String key) throws NBTParsingException {return values.get(new NBTString(key));}
     
     @Override public NBTValue remove(final NBTString key) {return values.remove(key);}
     public NBTValue remove(final Sequence key) throws NBTParsingException {return values.remove(new NBTString(key));}
-    public NBTValue remove(final String key) {return values.remove(new NBTString(key));}
+    public NBTValue remove(final String key) throws NBTParsingException {return values.remove(new NBTString(key));}
     
     private static class NBTObjectIterator implements Iterator<NBTTag> {
         private final Iterator<Entry<NBTString,NBTValue>> i;

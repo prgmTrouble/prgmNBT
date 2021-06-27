@@ -7,6 +7,7 @@ import nbt.value.collection.NBTArray;
 import nbt.value.collection.NBTObject;
 import nbt.value.collection.NBTPrimitiveArray;
 import nbt.value.collection.NBTTag;
+import util.ExceptionUtils;
 import util.container.ArrayUtils;
 import util.container.Queue;
 import util.container.Stack;
@@ -280,6 +281,43 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
     public boolean isWrappedIn(final char c) {return end > start && data[start] == c && data[end - 1] == c;}
     /**@return This sequence, with the first and last characters removed.*/
     public Sequence unwrap() {return end > start? subSequence(1,-1) : this;}
+    /**@return The hexadecimal character representation of the input's lower 4 bits.*/
+    public static final char toHexChar(int c) {return (char)((c &= 0xF) > 9? c - 10 + 'A' : ('0' + c));}
+    /**@return The integer representation of the hexadecimal input, or <code>-1</code> iff invalid.*/
+    public static final int fromHexChar(final char c) {
+        return '9' < c || c < '0'? ('F' < c || c < 'A'? 'f' < c || c < 'a'? -11
+                                                                          : c - 'a'
+                                                      : c - 'A') + 10
+                                 : c - '0';
+    }
+    /**@return The same string, but the escape characters are parsed.*/
+    public static Sequence unescape(final Sequence s) {
+        final char[] buf = s.toChars();
+        int i = -1;
+        {
+            boolean escaped = false;
+            for(final char c : buf) {
+                if(!escaped) {if(escaped = c == '\\') continue;}
+                else escaped = false;
+                buf[++i] = c;
+            }
+            if(escaped)
+                throw new IllegalArgumentException(
+                    ExceptionUtils.fmtParsing(
+                        "Invalid escape character at end of sequence",
+                        i,s
+                    )
+                );
+        }
+        return new Sequence(0,i + 1,buf);
+    }
+    /**@return The same string, but the escape characters are parsed.*/
+    public Sequence unescape() {return unescape(this);}
+    /**
+     * @return The same string, but with the first and last characters removed and
+     *         the escape characters parsed.
+     */
+    public Sequence unwrapAndUnescape() {return unwrap().unescape();}
     
     /**
      * @param str    Character buffer to copy into.
@@ -657,3 +695,37 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         return new Sequence(out);
     }
 }
+/*
+// Unescapes and parses unicode
+public static Sequence unescape(final Sequence s) {
+    final char[] buf = s.toChars();
+    int i = -1;
+    {
+        boolean escaped = false;
+        int unicode = 0,u = 0;
+        for(int j = 0;j < buf.length;++j) {
+            char c = buf[j];
+            if(!escaped) {
+                if(unicode != 0) {
+                    final int hex = fromHexChar(c);
+                    if(hex == -1)
+                        throw new IllegalArgumentException(
+                            ExceptionUtils.fmtParsing(
+                                "Invalid hexadecimal character '%c' ('\\u%04X')"
+                                .formatted(c,(int)c),j,s
+                            )
+                        );
+                    u = u << 4 | hex;
+                    if(--unicode != 0) continue;
+                    c = (char)u;
+                } else if(escaped = c == '\\') continue;
+            } else {
+                escaped = false;
+                if(c == 'u') {unicode = 4; u = 0; continue;}
+            }
+            buf[++i] = c;
+        }
+    }
+    return new Sequence(0,i + 1,buf);
+}
+*/
