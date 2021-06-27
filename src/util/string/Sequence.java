@@ -311,13 +311,33 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         }
         return new Sequence(0,i + 1,buf);
     }
-    /**@return The same string, but the escape characters are parsed.*/
+    /**@return The same sequence, but the escape characters are parsed.*/
     public Sequence unescape() {return unescape(this);}
     /**
-     * @return The same string, but with the first and last characters removed and
+     * @return The same sequence, but with the first and last characters removed and
      *         the escape characters parsed.
      */
     public Sequence unwrapAndUnescape() {return unwrap().unescape();}
+    private static Sequence escapeEscapes(final Sequence s) {
+        final Sequence[] split = s.basicSplit('\\');
+        if(split.length == 1) return s;
+        final Joiner j = new Joiner(new Sequence('\\','\\'));
+        for(final Sequence sp : split) j.push(sp);
+        return j.concat();
+    }
+    private static Sequence escape(Sequence s,final char escape) {
+        final Sequence[] split = (s = escapeEscapes(s)).basicSplit(escape);
+        if(split.length == 1) return s;
+        final Joiner j = new Joiner(new Sequence('\\',escape));
+        for(final Sequence sp : split) j.push(sp);
+        return j.concat();
+    }
+    /**@return The same sequence, but wrapped and with quotes escaped.*/
+    public static Sequence quoteAndEscape(final Sequence s,final char quote) {
+        return Wrapper.wrap(escape(s,quote),quote);
+    }
+    /**@return The same sequence, but wrapped and with quotes escaped.*/
+    public Sequence quoteAndEscape(final char quote) {return quoteAndEscape(this,quote);}
     
     /**
      * @param str    Character buffer to copy into.
@@ -458,6 +478,19 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         }
         out[l] = new Sequence(idx(split.pop()),end,data);
         return out;
+    }
+    /**
+     * Splits this sequence into sub-sequences.
+     * 
+     * @param split Indices marking the end of each sequence excepting the last, in
+     *              descending order.
+     * 
+     * @return An array of {@linkplain Sequence} instances which share the same
+     *         backing array as the original sequence.
+     */
+    public Sequence[] split(final Stack<Integer> split) {
+        if(split == null || split.size() == 0) return new Sequence[] {new Sequence(data)};
+        return splitBase(split);
     }
     /**
      * @return An array of sequences such that each is contiguous and their union

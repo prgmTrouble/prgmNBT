@@ -87,46 +87,44 @@ public class JSONString extends JSONValue {
                 c = i.next(); // Should never return null because of while condition.
             }
         }
-        // Ensure there's a terminating quote.
-        if(checkQuotes && i.peek() != wrapper)
-            throw new JSONParsingException("Missing ending quote",i);
-        // Advance past the quote.
-        i.next();
-        final Sequence value = i.subSequence();
-        // Return immediately if none of the characters were translated into unicode
-        // escape sequences.
-        if(!escapeUnicode || chars.size() == 0) return value;
-        
-        // Buffer size is the number of characters in the original sequence, plus 5
-        // times the number of added unicode sequences. This accounts for one
-        // character removed, and 6 added in the "\\u####" expression.
-        final char[] buf = new char[value.length() + chars.size() * 5]; //TODO quotes
-        int cursor = buf.length,prev = value.length();
-        for(
-            final NodeIterator<Integer> j = indices.iterator(),
-            c = chars.iterator();
-            j.hasNext();
-        ) {
-            final int p = j.next();
-            // Copy the next contiguous section of ASCII characters.
-            value.subSequence(p + 1,prev).copyInto(buf,cursor -= prev - p - 1);
-            {
-                // Convert the character into hexadecimal.
-                int v = c.next();
-                buf[--cursor] = toHexChar(v);
-                buf[--cursor] = toHexChar(v >>>= 4);
-                buf[--cursor] = toHexChar(v >>>= 4);
-                buf[--cursor] = toHexChar(v >>>  4);
+        boolean flag = false;
+        if(wrapper == '"' && i.peek() == wrapper) i.next();
+        else if(checkQuotes) throw new JSONParsingException("Missing ending quote",i);
+        else flag = true;
+        Sequence v = i.subSequence();
+        if(escapeUnicode && chars.size() != 0) {
+            // Buffer size is the number of characters in the original sequence, plus 5
+            // times the number of added unicode sequences. This accounts for one
+            // character removed, and 6 added in the "\\u####" expression.
+            final char[] buf = new char[v.length() + chars.size() * 5];
+            int cursor = buf.length,prev = v.length();
+            for(
+                final NodeIterator<Integer> j = indices.iterator(),
+                c = chars.iterator();
+                j.hasNext();
+            ) {
+                final int p = j.next();
+                // Copy the next contiguous section of ASCII characters.
+                v.subSequence(p + 1,prev).copyInto(buf,cursor -= prev - p - 1);
+                {
+                    // Convert the character into hexadecimal.
+                    int t = c.next();
+                    buf[--cursor] = toHexChar(t);
+                    buf[--cursor] = toHexChar(t >>>= 4);
+                    buf[--cursor] = toHexChar(t >>>= 4);
+                    buf[--cursor] = toHexChar(t >>>  4);
+                }
+                // Add the prefix.
+                buf[--cursor] = 'u';
+                buf[--cursor] = '\\';
+                // Update the last index.
+                prev = p;
             }
-            // Add the prefix.
-            buf[--cursor] = 'u';
-            buf[--cursor] = '\\';
-            // Update the last index.
-            prev = p;
+            // Copy the remaining characters from the beginning.
+            v.subSequence(0,prev).copyInto(buf,0);
+            v = new Sequence(buf);
         }
-        // Copy the remaining characters from the beginning.
-        value.subSequence(0,prev).copyInto(buf,0);
-        return new Sequence(buf);
+        return flag? v.quoteAndEscape('"') : v;
     }
     /**Ensures that the input sequence is valid and unwraps if necessary.*/
     private static Sequence validate(Sequence value,final boolean escapeUnicode) throws JSONParsingException {

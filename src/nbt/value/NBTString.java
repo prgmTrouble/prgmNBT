@@ -10,10 +10,8 @@ import nbt.value.number.NBTNumber;
 import settings.Version;
 import util.container.NodeIterator;
 import util.container.Stack;
-import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
-import util.string.Wrapper;
 import util.string.outline.Segment;
 import util.string.outline.ValueSegment;
 
@@ -410,24 +408,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
     }
     @Override public boolean isDefault() {return value.equals(localDefault);}
     
-    private static Sequence escapeEscapes(final Sequence s) {
-        final Sequence[] split = s.basicSplit('\\');
-        if(split.length == 1) return s;
-        final Joiner j = new Joiner(new Sequence('\\','\\'));
-        for(final Sequence sp : split) j.push(sp);
-        return j.concat();
-    }
-    private static Sequence escape(Sequence s,final char escape) {
-        final Sequence[] split = (s = escapeEscapes(s)).basicSplit(escape);
-        if(split.length == 1) return s;
-        final Joiner j = new Joiner(new Sequence('\\',escape));
-        for(final Sequence sp : split) j.push(sp);
-        return j.concat();
-    }
-    @Override
-    protected Sequence complete() {
-        return Wrapper.wrap(escape(value,quoteStyle),quoteStyle);
-    }
+    @Override protected Sequence complete() {return value.quoteAndEscape(quoteStyle);}
     @Override protected Sequence minimal() {return value;}
     /**@return The unwrapped value.*/
     public Sequence unwrapped() {return value;}
