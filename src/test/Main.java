@@ -48,7 +48,7 @@ public class Main {
     static NBTObject v19w08a_bin() {return readBin(Version.v19w08a,"1.16.dat_old",true);}
     
     public static void main(String[] args) throws NBTParsingException {
-        
+        v19w08a_file();
     }
     
 }

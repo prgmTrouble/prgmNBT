@@ -321,14 +321,14 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
     private static Sequence escapeEscapes(final Sequence s) {
         final Sequence[] split = s.basicSplit('\\');
         if(split.length == 1) return s;
-        final Joiner j = new Joiner(new Sequence('\\','\\'));
+        final Joiner j = new Joiner(new Sequence('\\',2));
         for(final Sequence sp : split) j.push(sp);
         return j.concat();
     }
     private static Sequence escape(Sequence s,final char escape) {
         final Sequence[] split = (s = escapeEscapes(s)).basicSplit(escape);
         if(split.length == 1) return s;
-        final Joiner j = new Joiner(new Sequence('\\',escape));
+        final Joiner j = new Joiner(new Sequence(0,'\\',escape));
         for(final Sequence sp : split) j.push(sp);
         return j.concat();
     }

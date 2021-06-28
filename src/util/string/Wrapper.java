@@ -57,7 +57,7 @@ public class Wrapper implements Builder {
      * @return Thre wrapped data.
      */
     public static Sequence wrap(final Sequence data,final char wrapper) {
-        if(data == null || data.length() == 0) return new Sequence(wrapper,wrapper);
+        if(data == null || data.length() == 0) return new Sequence(wrapper,2);
         final char[] out = new char[data.length() + 2];
         data.copyInto(out,1);
         out[0] = out[out.length - 1] = wrapper;

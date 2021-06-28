@@ -111,11 +111,21 @@ public class Palette {
             final int rgba = color.hashCode();
             {
                 final byte[] l = variant(rgba,true);
-                light = Color.rgb(l[0],l[1],l[2],(double)l[3]/255.0);
+                light = Color.rgb(
+                    Byte.toUnsignedInt(l[0]),
+                    Byte.toUnsignedInt(l[1]),
+                    Byte.toUnsignedInt(l[2]),
+                    (double)l[3]/255.0
+                );
             }
             {
                 final byte[] l = variant(rgba,false);
-                dark = Color.rgb(l[0],l[1],l[2],(double)l[3]/255.0);
+                dark = Color.rgb(
+                    Byte.toUnsignedInt(l[0]),
+                    Byte.toUnsignedInt(l[1]),
+                    Byte.toUnsignedInt(l[2]),
+                    (double)l[3]/255.0
+                );
             }
         }
         public PaletteColor(int color,final boolean alpha) {
@@ -123,11 +133,21 @@ public class Palette {
             this.color = Color.rgb(R(color),G(color),B(color),(double)A(color)/255.0);
             {
                 final byte[] l = variant(color,true);
-                light = Color.rgb(l[0],l[1],l[2],(double)l[3]/255.0);
+                light = Color.rgb(
+                    Byte.toUnsignedInt(l[0]),
+                    Byte.toUnsignedInt(l[1]),
+                    Byte.toUnsignedInt(l[2]),
+                    (double)Byte.toUnsignedInt(l[3])/255.0
+                );
             }
             {
                 final byte[] l = variant(color,false);
-                dark = Color.rgb(l[0],l[1],l[2],(double)l[3]/255.0);
+                dark = Color.rgb(
+                    Byte.toUnsignedInt(l[0]),
+                    Byte.toUnsignedInt(l[1]),
+                    Byte.toUnsignedInt(l[2]),
+                    (double)Byte.toUnsignedInt(l[3])/255.0
+                );
             }
         }
     }
