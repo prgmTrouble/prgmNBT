@@ -7,7 +7,7 @@ import util.string.Sequence.SequenceIterator;
 /**
  * A floating-point {@linkplain NBTNumber}.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public abstract class NBTFP extends NBTNumber {
@@ -31,13 +31,13 @@ public abstract class NBTFP extends NBTNumber {
     /**
      * Creates a floating-point value with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     protected NBTFP(final Number value) {super(value);}
     /**
      * Creates a floating-point value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     protected NBTFP(final Number value,final boolean minimal) {super(value,minimal);}
     
@@ -53,8 +53,8 @@ public abstract class NBTFP extends NBTNumber {
      *               
      * @return The appropriate floating-point value.
      *               
-     * @throws NBTParsingException If the iterator cannot find a valid floating point
-     *                      number.
+     * @throws NBTParsingException The iterator could not find a valid floating
+     *                             point number.
      */
     protected static NBTFP parse(final SequenceIterator i,final char suffix) throws NBTParsingException {
         if(NBTFloat.isFloatSuffix(suffix)) {

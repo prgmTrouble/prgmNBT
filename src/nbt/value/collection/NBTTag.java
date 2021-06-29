@@ -16,6 +16,12 @@ import util.string.Sequence.SequenceIterator;
 import util.string.outline.JoiningSegment;
 import util.string.outline.Segment;
 
+/**
+ * An {@linkplain NBT} representing a key-value pair.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class NBTTag extends NBT {
     public static final char SEPARATOR = ':';
     
@@ -25,33 +31,67 @@ public class NBTTag extends NBT {
      */
     public static final boolean THE_WILD_WEST = Version.isBefore(Version.v17w16a);
     
-    /**The {@linkplain NBTValue} held by this object.*/
-    public NBTValue value;
     /**This tag's key. This should not be modifiable.*/
     protected final NBTString key;
+    /**The {@linkplain NBTValue} held by this object.*/
+    private NBTValue value;
     
-    /**Constructs a tag.*/
-    public NBTTag(final NBTString key,final NBTValue value) {
+    /**
+     * Constructs a tag.
+     * 
+     * @throws NullPointerException The key or value is <code>null</code>.
+     * @throws NBTException The key is empty.
+     */
+    public NBTTag(final NBTString key,final NBTValue value) throws NullPointerException,
+                                                                   NBTParsingException {
         super((THE_WILD_WEST || key.minimal) && value.minimal);
-        this.key = key; this.value = value;
+        if((this.key = key).unwrapped().isEmpty())
+            throw new NBTParsingException("Empty key.");
+        value(value);
         if(THE_WILD_WEST) this.key.minimal = true;
     }
-    /**Reads a tag.*/
+    /**
+     * Reads a tag.
+     * 
+     * @throws IOException The tag could not be read.
+     * @throws NBTException The tag is invalid.
+     */
     public NBTTag(final DataInput in,final byte id) throws IOException,NBTException {
         final ValueType t = ValueType.getType(id);
         if(t == null)
             throw new NBTException(
                 "Unknown type %d.".formatted(id)
             );
-        key = new NBTString(in);
+        if((key = new NBTString(in)).unwrapped().isEmpty())
+            throw new NBTException("Empty key.");
         value = t.read(in);
     }
-    /**Writes this tag.*/
+    /**
+     * Writes this tag.
+     * 
+     * @throws IOException The tag could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {
         out.write(value.type().id);
         key.write(out);
         value.write(out);
+    }
+    
+    /**@return This tag's value.*/
+    public NBTValue value() {return value;}
+    /**
+     * @param value This tag's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NullPointerException The input is null.
+     */
+    public NBTTag value(final NBTValue value) throws NullPointerException {
+        if(value == null)
+            throw new NullPointerException("Cannot assign null value.");
+        this.value = value;
+        return this;
     }
     
     @Override public boolean isDefault() {return value.isDefault();}
@@ -71,11 +111,20 @@ public class NBTTag extends NBT {
                             .push(value.toSegment());
     }
     
-    /**Strictly parses a key.*/
-    public static NBT parse(final SequenceIterator i) throws NBTParsingException {
+    /**
+     * Strictly parses a key.
+     * 
+     * @throws NBTParsingException Either the key or value could not be parsed.
+     */
+    public static NBTTag parse(final SequenceIterator i) throws NBTParsingException {
         return new NBTTag(parseKey(i),parseValue(i));
     }
     
+    /**
+     * Parses a key.
+     * 
+     * @throws NBTParsingException The key could not be parsed.
+     */
     public static NBTString parseKey(final SequenceIterator i) throws NBTParsingException {
         if(THE_WILD_WEST) {
             // I hate this as much as you do.
@@ -137,7 +186,7 @@ public class NBTTag extends NBT {
             );
         }
         // Blank keys are not allowed.
-        if(key.unwrapped().stripLeading().isEmpty()) throw new NBTParsingException("Blank key",i);
+        if(key.unwrapped().isEmpty()) throw new NBTParsingException("Blank key",i);
         // The key must be followed by a separator character to be a tag.
         if(i.skipWS() != SEPARATOR)
             throw new NBTParsingException(
@@ -148,6 +197,11 @@ public class NBTTag extends NBT {
         if(i.nextNonWS() == null) throw new NBTParsingException("Missing value",i);
         return key;
     }
+    /**
+     * Parses a value.
+     * 
+     * @throws NBTParsingException The value could not be parsed.
+     */
     protected static NBTValue parseValue(final SequenceIterator i) throws NBTParsingException {
         try {return NBTValue.parse(i,NBTObject.CLOSE,true);}
         catch(final NBTParsingException e) {
@@ -160,27 +214,3 @@ public class NBTTag extends NBT {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

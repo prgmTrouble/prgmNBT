@@ -5,6 +5,12 @@ import java.io.File;
 import util.string.Sequence;
 import util.string.outline.Segment;
 
+/**
+ * The settings for all aspects of this program.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public final class Settings {
     private Settings() {}
     
@@ -37,6 +43,7 @@ public final class Settings {
         escapeUnicodeByDefault(true);
     }
     
+    /**Saves all settings to an external file.*/
     public static void export(final File f) {
         //TODO export as json file
     }
@@ -58,10 +65,10 @@ public final class Settings {
             );
         return v;
     }
-    public static void theme(final Theme t) {theme = nn(t,"theme");}
-    public static void version(final Version v) {version = nn(v,"version");}
+    public static void theme(final Theme t) throws NullPointerException {theme = nn(t,"theme");}
+    public static void version(final Version v) throws NullPointerException {version = nn(v,"version");}
     public static void defaultMinimal(final boolean dm) {defaultMinimal = dm;}
-    public static void defaultIndent(final Sequence di) {defaultIndent = nn(di,"default indent");}
+    public static void defaultIndent(final Sequence di) throws NullPointerException {defaultIndent = nn(di,"default indent");}
     public static void defaultFoldedCharLimit(final int dfcl) {defaultFoldedCharLimit = dfcl;}
     public static void defaultFoldedChildLimit(final int dfcl) {defaultFoldedChildLimit = dfcl;}
     public static void exceptionCharacterLimit(final int ecl) {exceptionCharacterLimit = ecl;}

@@ -9,7 +9,7 @@ import nbt.value.ValueType;
 /**
  * A 64-bit floating-point {@linkplain NBTNumber}.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTDouble extends NBTFP {
@@ -27,30 +27,38 @@ public class NBTDouble extends NBTFP {
      * Creates a double value of {@linkplain #GLOBAL_DEFAULT} with default
      * minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTDouble() {super(GLOBAL_DEFAULT);}
     /**
      * Creates a double value of {@linkplain #GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTDouble(final boolean minimal) {super(GLOBAL_DEFAULT,minimal);}
     /**
      * Creates a double value with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTDouble(final double value) {super(value);}
     /**
      * Creates a double value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTDouble(final double value,final boolean minimal) {super(value,minimal);}
-    /**Reads a double value.*/
+    /**
+     * Reads a double value.
+     * 
+     * @throws IOException The value could not be read.
+     */
     public NBTDouble(final DataInput in) throws IOException {super(in.readDouble());}
-    /**Writes this double value.*/
+    /**
+     * Writes this double value.
+     * 
+     * @throws IOException The value could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {out.writeDouble(value.doubleValue());}
     

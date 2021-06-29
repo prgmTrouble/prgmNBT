@@ -3,6 +3,13 @@ package util.string.outline;
 import settings.Settings;
 import util.string.Sequence;
 
+/**
+ * An {@linkplain Segment} which includes prefix and suffix sequences to put
+ * before and after (respectively) its child.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class WrappingSegment extends Segment {
     private final Sequence openFolded,openExpanded,
                            closeFolded,closeExpanded;
@@ -10,22 +17,39 @@ public class WrappingSegment extends Segment {
     private final int wrapperSize;
     private Segment child = null;
     
-    public WrappingSegment(final Sequence open,final Sequence close) {
-        if(open == null || close == null || open.isEmpty() || close.isEmpty())
-            throw new IllegalArgumentException("Empty wrapper.");
+    /**
+     * Creates a wrapping segment. <code>null</code> values yield empty sequences.
+     * 
+     * @param open  Sequence to append before the child.
+     * @param close Sequence to append after the child.
+     */
+    public WrappingSegment(Sequence open,Sequence close) {
+        if(open == null) open = Sequence.EMPTY;
+        if(close == null) close = Sequence.EMPTY;
         final Sequence[] shared = Sequence.shared(open,close);
         openFolded = openExpanded = shared[0];
         closeFolded = closeExpanded = shared[1];
         wrapperSize = openFolded.length() + closeFolded.length();
     }
-    public WrappingSegment(final Sequence openFolded,final Sequence openExpanded,
-                           final Sequence closeFolded,final Sequence closeExpanded) {
-        if(
-            openFolded == null || openExpanded == null ||
-            closeFolded == null || closeExpanded == null ||
-            openFolded.isEmpty() || openExpanded.isEmpty() ||
-            closeFolded.isEmpty() || closeExpanded.isEmpty()
-        ) throw new IllegalArgumentException("Cannot have empty wrappers.");
+    /**
+     * Creates a wrapping segment. <code>null</code> values yield empty sequences.
+     * 
+     * @param openFolded    Sequence to append before the child iff this segment is
+     *                      folded.
+     * @param openExpanded  Sequence to append before the child iff this segment is
+     *                      expanded.
+     * @param closeFolded   Sequence to append after the child iff this segment is
+     *                      folded.
+     * @param closeExpanded Sequence to append after the child iff this segment is
+     *                      expanded.
+     */
+    public WrappingSegment(Sequence openFolded,Sequence openExpanded,
+                           Sequence closeFolded,Sequence closeExpanded) {
+        if(openFolded == null) openFolded = Sequence.EMPTY;
+        if(openExpanded == null) openExpanded = Sequence.EMPTY;
+        if(closeFolded == null) closeFolded = Sequence.EMPTY;
+        if(closeExpanded == null) closeExpanded = Sequence.EMPTY;
+        
         final Sequence[] shared = Sequence.shared(
             openFolded,openExpanded,
             closeFolded,closeExpanded
@@ -37,13 +61,29 @@ public class WrappingSegment extends Segment {
         wrapperSize = openFolded.length() + closeFolded.length();
     }
     
+    /**@return The indentation sequence currently being used by this segment.*/
     public Sequence indent() {return indent;}
+    /**
+     * @param indent The indentation sequence to use. <code>null</code> values yield
+     *               the default indent.
+     *               
+     * @return <code>this</code>
+     *               
+     * @see Settings#defaultIndent()
+     */
     public WrappingSegment indent(final Sequence indent) {
         this.indent = indent == null? Settings.defaultIndent() : indent;
         return this;
     }
     
+    /**@return The child segment.*/
     public Segment child() {return child;}
+    /**
+     * @param child The child segment. <code>null</code> values yield an empty
+     *              segment.
+     * 
+     * @return <code>this</code>
+     */
     public WrappingSegment child(final Segment child) {this.child = child; return this;}
     
     @Override public int size() {return wrapperSize + (child == null? 0 : child.size());}

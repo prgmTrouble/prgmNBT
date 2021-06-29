@@ -7,9 +7,11 @@ import nbt.value.NBTValue;
 import nbt.value.ValueType;
 
 /**
+ * A 16-bit integral type.
+ * 
  * @see NBTi32
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTShort extends NBTi32 {
@@ -22,37 +24,37 @@ public class NBTShort extends NBTi32 {
      * Creates a short value of {@linkplain NBTi32#GLOBAL_DEFAULT} with default
      * minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTShort() {super();}
     /**
      * Creates a short value of {@linkplain NBTi32#GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTShort(final boolean minimal) {super(minimal);}
     /**
      * Creates a short value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTShort(final short value) {super(value);}
     /**
      * Creates a short value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTShort(final int value) {super(value);}
     /**
      * Creates a short value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTShort(final short value,final boolean minimal) {super(value,minimal);}
     /**
      * Creates a short value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTShort(final int value,final boolean minimal) {super(value,minimal);}
     /**Reads a short value.*/

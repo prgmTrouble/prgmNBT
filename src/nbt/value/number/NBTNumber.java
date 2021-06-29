@@ -10,9 +10,13 @@ import nbt.value.number.NBTFP.Delimiter;
 import settings.Version;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
-import util.string.outline.Segment;
-import util.string.outline.ValueSegment;
 
+/**
+ * An {@linkplain NBTValue} which holds a numeric value.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public abstract class NBTNumber extends NBTValue {
     // Access is protected to avoid null values.
     protected Number value;
@@ -25,13 +29,13 @@ public abstract class NBTNumber extends NBTValue {
     /**
      * Creates a numeric value with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     protected NBTNumber(final Number value) {super(); this.value = value;}
     /**
      * Creates a numeric value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     protected NBTNumber(final Number value,final boolean minimal) {super(minimal); this.value = value;}
     
@@ -54,7 +58,6 @@ public abstract class NBTNumber extends NBTValue {
     }
     
     @Override public Sequence toSequence() {return suffix() == 0 || !forceSuffix() && minimal? minimal() : complete();}
-    @Override public Segment toSegment() {return new ValueSegment(toSequence());}
     
     /**
      * Converts a numeric value to another type.
@@ -109,7 +112,7 @@ public abstract class NBTNumber extends NBTValue {
      * 
      * @return The appropriate {@linkplain NBTNumber}.
      * 
-     * @throws NBTParsingException If the iterator cannot find a valid number.
+     * @throws NBTParsingException The iterator cannot find a valid number.
      */
     public static NBTNumber parse(final SequenceIterator i,
                                   final Character terminator,

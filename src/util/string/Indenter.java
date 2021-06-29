@@ -7,7 +7,7 @@ import util.container.Queue;
 /**
  * A {@linkplain Builder} which manages the indentation of lines.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class Indenter implements Builder {
@@ -23,10 +23,13 @@ public class Indenter implements Builder {
         private int size;
         
         private Line(final Sequence content,final int indentCount) {
-            size = (this.content = content).length() + indentCount * indent.length();
+            size = (this.content = content) == null
+                    ? 0
+                    : content.length() + indentCount * indent.length();
             this.indentCount = indentCount - 1;
         }
         private int pop(final char[] buf,int cursor) {
+            if(size == 0) return cursor;
             if(indentCount != -1) {
                 final Sequence ws;
                 {
@@ -42,8 +45,14 @@ public class Indenter implements Builder {
     private final Queue<Line> lines = new Queue<>();
     private int indents = 0,size = 0;
     
-    /**Creates an indenter with the specified indentation sequence.*/
-    public Indenter(final Sequence indent) {this.indent = indent;}
+    /**
+     * Creates an indenter with the specified indentation sequence. A
+     * <code>null</code> value yields an empty sequence.
+     */
+    public Indenter(final Sequence indent) {
+        this.indent = indent == null? Sequence.EMPTY
+                                    : indent;
+    }
     /**Creates an indenter using {@linkplain #DEFAULT_INDENT}.*/
     public Indenter() {this(DEFAULT_INDENT);}
     
@@ -69,7 +78,7 @@ public class Indenter implements Builder {
                 lines.push(l);
                 size += l.size;
             }
-        } else push(b.concat());
+        } else if(b != null) push(b.concat());
         return this;
     }
     

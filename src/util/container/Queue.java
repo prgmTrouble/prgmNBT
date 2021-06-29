@@ -3,7 +3,7 @@ package util.container;
 /**
  * A FIFO implementation of {@linkplain Container}.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class Queue<V> extends Container<V> {

@@ -12,6 +12,12 @@ import util.container.ArrayUtils;
 import util.container.Queue;
 import util.container.Stack;
 
+/**
+ * A lightweight immutable sequence of characters.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Character> {
     /**A shared instance of an empty character array.*/
     private static final char[] EMPTY_DATA = {};
@@ -95,7 +101,9 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         }
     }
     /**Creates a sequence from a string.*/
-    public Sequence(final String s) {this(s.toCharArray());}
+    public Sequence(final String s) {
+        this(s == null? EMPTY_DATA : s.toCharArray());
+    }
     /**Repeats a sequence <code>count</code> times.*/
     public Sequence(final Sequence s,final int count) {
         if(s == null) {
@@ -115,7 +123,9 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         }
     }
     /**Creates a sequence from a string repeated <code>count</code> times.*/
-    public Sequence(final String s,final int count) {this(s.repeat(count).toCharArray());}
+    public Sequence(final String s,final int count) {
+        this(s == null? EMPTY_DATA : s.repeat(count).toCharArray());
+    }
     /**Creates a sequence from a character repeated <code>count</code> times.*/
     public Sequence(final char c,final int count) {
         start = 0;
@@ -145,9 +155,28 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         return new Sequence(repeat(buf,count,length()));
     }
     
-    private int idx(final int i) {return i + (i < 0? end : start);}
+    private int idx(int i) {
+        i += (i < 0? end : start);
+        if(end < i || i < start)
+            throw new IndexOutOfBoundsException(
+                "Attempted to access index %d from sequence of length %d."
+                .formatted(i,length())
+            );
+        return i;
+    }
     @Override public int length() {return end - start;}
-    @Override public char charAt(final int index) {return data[idx(index)];}
+    /**
+     * Gets the character at the specified index.
+     * 
+     * @param index A positive integer in the range
+     *              <code>(-length(),length())</code>. Negative indices are
+     *              equivalent to <code>length() + index</code>.
+     *              
+     * @throws IndexOutOfBoundsException <code>|index| >= length()</code>
+     * 
+     * @see java.lang.CharSequence#charAt(int)
+     */
+    @Override public char charAt(final int index) throws IndexOutOfBoundsException {return data[idx(index)];}
     
     /**A basic iterator which traverses a {@linkplain Sequence}.*/
     public abstract class SequenceIterator implements Iterator<Character> {
@@ -268,14 +297,26 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      */
     public ReverseSequenceIterator reverseIterator() {return new ReverseSequenceIterator();}
     
-    @Override public Sequence subSequence(final int start,final int end) {return new Sequence(idx(start),idx(end),data);}
+    /**
+     * @throws IndexOutOfBoundsException <code>|index| >= length()</code>
+     * 
+     * @see java.lang.CharSequence#subSequence(int, int)
+     */
+    @Override
+    public Sequence subSequence(final int start,final int end) throws IndexOutOfBoundsException {
+        return new Sequence(idx(start),idx(end),data);
+    }
     /**
      * @param start Starting index, inclusive.
      * 
      * @return The sequence from the specified index to the end of the original
      *         sequence.
+     * 
+     * @throws IndexOutOfBoundsException <code>|index| >= length()</code>
      */
-    public Sequence subSequence(final int start) {return new Sequence(idx(start),end,data);}
+    public Sequence subSequence(final int start) throws IndexOutOfBoundsException {
+        return new Sequence(idx(start),end,data);
+    }
     
     /**@return <code>true</code> iff the first and last characters of this sequence match the input.*/
     public boolean isWrappedIn(final char c) {return end > start && data[start] == c && data[end - 1] == c;}
@@ -290,8 +331,17 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
                                                       : c - 'A') + 10
                                  : c - '0';
     }
-    /**@return The same string, but the escape characters are parsed.*/
-    public static Sequence unescape(final Sequence s) {
+    /**
+     * @return The same string, but the escape characters are parsed.
+     * 
+     * @throws IllegalArgumentException If an invalid escape character at the end of
+     *                                  the sequence.
+     * @throws NullPointerException
+     */
+    public static Sequence unescape(final Sequence s)
+                                    throws NullPointerException,
+                                           IllegalArgumentException {
+        if(s == null) throw new NullPointerException("Cannot un-escape null sequence.");
         final char[] buf = s.toChars();
         int i = -1;
         {
@@ -333,7 +383,9 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         return j.concat();
     }
     /**@return The same sequence, but wrapped and with quotes escaped.*/
-    public static Sequence quoteAndEscape(final Sequence s,final char quote) {
+    public static Sequence quoteAndEscape(final Sequence s,final char quote)
+                                          throws NullPointerException {
+        if(s == null) throw new NullPointerException("Cannot escape a null sequence.");
         return Wrapper.wrap(escape(s,quote),quote);
     }
     /**@return The same sequence, but wrapped and with quotes escaped.*/
@@ -344,8 +396,14 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      * @param offset Starting position in the buffer.
      * 
      * @return The sum of the offset and this sequence's length.
+     * 
+     * @throws NullPointerException      If <code>str</code> is <code>null</code>.
+     * @throws IndexOutOfBoundsException If any of the indices are outside the input
+     *                                   array.
      */
-    public int copyInto(final char[] str,final int offset) {
+    public int copyInto(final char[] str,final int offset)
+                        throws NullPointerException,
+                               IndexOutOfBoundsException {
         final int l = length();
         System.arraycopy(
             data,start,
@@ -422,9 +480,12 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      * 
      * @return An array of two {@linkplain Sequence} instances which share the same
      *         backing array as the original sequence.
+     *         
+     * @throws ArrayIndexOutOfBoundsException If any of the indices are outside the
+     *                                        input array.
      */
-    public Sequence[] split(final int split) {
-        //return sharedOffset(data,start,end,idx(split));
+    public Sequence[] split(final int split)
+                            throws ArrayIndexOutOfBoundsException {
         final int idx = idx(split);
         return new Sequence[] {new Sequence(start,idx,data),new Sequence(idx,end,data)};
     }
@@ -436,8 +497,15 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      * 
      * @return An array of {@linkplain Sequence} instances which share the same
      *         backing array as the original sequence.
+     *         
+     * @throws IllegalArgumentException       If the indices are not in ascending
+     *                                        order.
+     * @throws ArrayIndexOutOfBoundsException If any of the indices are outside the
+     *                                        input array.
      */
-    public Sequence[] split(final int...split) {
+    public Sequence[] split(final int...split)
+                            throws IllegalArgumentException,
+                                   ArrayIndexOutOfBoundsException {
         if(split == null || split.length == 0) return new Sequence[] {new Sequence(data)};
         final Sequence[] out = new Sequence[split.length + 1];
         for(
@@ -461,8 +529,16 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      * 
      * @return An array of {@linkplain Sequence} instances which share the same
      *         backing array as the original sequence.
+     *         
+     * @throws IllegalArgumentException       If the indices are not in ascending
+     *                                        order.
+     * @throws ArrayIndexOutOfBoundsException If any of the indices are outside the
+     *                                        input array.
+     *         
      */
-    public Sequence[] split(final Queue<Integer> split) {
+    public Sequence[] split(final Queue<Integer> split)
+                            throws IllegalArgumentException,
+                                   ArrayIndexOutOfBoundsException {
         final int l;
         if(split == null || (l = split.size()) == 0) return new Sequence[] {new Sequence(data)};
         final Sequence[] out = new Sequence[l + 1];
@@ -487,8 +563,15 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      * 
      * @return An array of {@linkplain Sequence} instances which share the same
      *         backing array as the original sequence.
+     *         
+     * @throws IllegalArgumentException       If the indices are not in descending
+     *                                        order.
+     * @throws ArrayIndexOutOfBoundsException If any of the indices are outside the
+     *                                        input array.
      */
-    public Sequence[] split(final Stack<Integer> split) {
+    public Sequence[] split(final Stack<Integer> split)
+                            throws IllegalArgumentException,
+                                   ArrayIndexOutOfBoundsException {
         if(split == null || split.size() == 0) return new Sequence[] {new Sequence(data)};
         return splitBase(split);
     }
@@ -504,6 +587,7 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
             !indices.empty();
         ) {
             final int j = indices.pop();
+            if(j < k) throw new IllegalArgumentException("Indices must be in descending order.");
             out[--i] = new Sequence(j+1,k,data);
             k = j;
         }
@@ -637,6 +721,7 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      *         backing array.
      */
     public static Sequence[] shared(final char[]...data) {
+        if(data == null || data.length == 0) return new Sequence[] {EMPTY};
         final Sequence[] out = new Sequence[data.length];
         final char[] oDat;
         {
@@ -647,7 +732,7 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         }
         // Copy the data into the array, then instantiate the sequence object.
         for(int i = 0,j = 0;i < data.length;++i) {
-            if(data[i] == null) out[i] = new Sequence();
+            if(data[i] == null) out[i] = new Sequence(j,j,oDat);
             else {
                 System.arraycopy(
                     data[i],0,
@@ -666,8 +751,18 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      * 
      * @return An array of {@linkplain Sequence} instances which share the same
      *         backing array.
+     * 
+     * @throws IllegalArgumentException       If the indices are not in ascending
+     *                                        order.
+     * @throws NullPointerException           If <code>data</code> is null.
+     * @throws ArrayIndexOutOfBoundsException If any of the indices are outside the
+     *                                        input array.
      */
-    public static Sequence[] shared(final char[] data,final int...split) {
+    public static Sequence[] shared(final char[] data,final int...split)
+                                    throws IllegalArgumentException,
+                                           NullPointerException,
+                                           ArrayIndexOutOfBoundsException {
+        if(data == null) throw new NullPointerException("Data is null.");
         if(split == null || split.length == 0) return new Sequence[] {new Sequence(data)};
         final Sequence[] out = new Sequence[split.length + 1];
         for(
@@ -730,7 +825,7 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
 }
 /*
 // Unescapes and parses unicode
-public static Sequence unescape(final Sequence s) {
+public static Sequence unescape(final Sequence s) throws IllegalArgumentException {
     final char[] buf = s.toChars();
     int i = -1;
     {

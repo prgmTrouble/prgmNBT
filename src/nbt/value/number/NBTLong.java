@@ -11,7 +11,7 @@ import util.string.Sequence.SequenceIterator;
 /**
  * An integral {@linkplain NBTNumber} which can be represented in 64 bits.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTLong extends NBTNumber {
@@ -29,25 +29,25 @@ public class NBTLong extends NBTNumber {
     /**
      * Creates a long value of {@linkplain #GLOBAL_DEFAULT} with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTLong() {super(GLOBAL_DEFAULT);}
     /**
      * Creates a long value of {@linkplain #GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTLong(final boolean minimal) {super(GLOBAL_DEFAULT,minimal);}
     /**
      * Creates a long value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTLong(final long value) {super(value);}
     /**
      * Creates a long value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTLong(final long value,final boolean minimal) {super(value,minimal);}
     /**Reads a long value.*/
@@ -61,9 +61,18 @@ public class NBTLong extends NBTNumber {
     @Override protected char suffix() {return SUFFIX_0;}
     @Override protected boolean forceSuffix() {return SUFFIX_POLICY;}
     
+    /**@return <code>true</code> iff the provided character represents a 64 bit integral type.*/
     public static boolean isLongSuffix(final char suffix) {
         return suffix == SUFFIX_0 || suffix == SUFFIX_1;
     }
+    
+    /**
+     * @param i A {@linkplain SequenceIterator} which points to the position just
+     *          before the long sequence. There cannot be any trailing data
+     *          following the number.
+     *          
+     * @throws NBTParsingException If the iterator cannot find a valid long value.
+     */
     public static NBTLong parseNoSuffix(final SequenceIterator i) throws NBTParsingException {
         if(i.hasNext()) {
             final boolean negative;

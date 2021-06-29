@@ -11,7 +11,7 @@ import util.string.Joiner;
 /**
  * An {@linkplain NBTPrimitiveArray} which holds {@linkplain NBTByte} values.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTByteArray extends NBTPrimitiveArray {
@@ -24,16 +24,25 @@ public class NBTByteArray extends NBTPrimitiveArray {
     /**
      * Creates an empty byte array with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     public NBTByteArray() throws NBTException {super(TOKEN.subtype);}
     /**
      * Creates an empty byte array.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     public NBTByteArray(final boolean minimal) throws NBTException {super(TOKEN.subtype,minimal);}
-    /**Reads a byte array.*/
+    /**
+     * Reads a byte array.
+     * 
+     * @throws IOException The array could not be read.
+     * @throws NBTException Primitive arrays are not enabled in this version.
+     */
     public NBTByteArray(final DataInput in) throws IOException,NBTException {
         this();
         final byte[] elements = new byte[in.readInt()];
@@ -41,11 +50,21 @@ public class NBTByteArray extends NBTPrimitiveArray {
         addAll(elements);
     }
     
+    /**
+     * Adds all the values to the array.
+     * 
+     * @return <code>this</code>
+     */
     public NBTByteArray addAll(final byte...elements) {
         if(elements != null && elements.length != 0)
             for(final byte e : elements) values.add(new NBTByte(e));
         return this;
     }
+    /**
+     * Adds all the values to the array.
+     * 
+     * @return <code>this</code>
+     */
     public NBTByteArray addAll(final int...elements) {
         if(elements != null && elements.length != 0)
             for(final int e : elements) values.add(new NBTByte(e));

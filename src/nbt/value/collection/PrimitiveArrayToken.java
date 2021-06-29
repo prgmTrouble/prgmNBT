@@ -8,13 +8,25 @@ import nbt.value.ValueType;
 import util.string.Joiner;
 import util.string.Sequence;
 
+/**
+ * An enumeration of tokens for primitive array types.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public enum PrimitiveArrayToken {
+    /**@see NBTByteArray*/
     BYTE('B',ValueType.BYTE),
+    /**@see NBTIntArray*/
     INT ('I',ValueType.INT),
+    /**@see NBTLongArray*/
     LONG('L',ValueType.LONG);
     
+    /**The character which appears directly after the opening character.*/
     public final char arrayPrefix;
+    /**The {@linkplain ValueType} of the elements.*/
     public final ValueType subtype;
+    /**A shared sequence of an empty primitive array.*/
     public final Sequence empty;
     private final Sequence[] wrapper;
     
@@ -26,6 +38,7 @@ public enum PrimitiveArrayToken {
     }
     
     public Joiner getJoiner() {return new Joiner(wrapper);}
+    /**@return The token associated with this character, or <code>null</code> iff no tokens match.*/
     public static PrimitiveArrayToken fromChar(final char c) {
         return switch(c) {
             case 'B' -> BYTE;

@@ -3,7 +3,7 @@ package util.string;
 /**
  * A {@linkplain Builder} which wraps an input string between values.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class Wrapper implements Builder {
@@ -36,7 +36,9 @@ public class Wrapper implements Builder {
      * @param prefix A character sequence which appears before the output string.
      * @param suffix A character sequence which appears after the output string.
      */
-    public Wrapper(final Sequence prefix,final Sequence suffix) {this(prefix.toChars(),suffix.toChars());}
+    public Wrapper(final Sequence prefix,final Sequence suffix) {
+        this(prefix == null? null : prefix.toChars(),suffix == null? null : suffix.toChars());
+    }
     
     @Override
     public Wrapper push(final Sequence s) {

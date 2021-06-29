@@ -8,7 +8,7 @@ import util.string.Sequence.SequenceIterator;
  * An integral {@linkplain NBTNumber} which can be represented in 32 bits (i.e.
  * <code>byte</code>s, <code>short</code>s, and <code>int</code>s).
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public abstract class NBTi32 extends NBTNumber {
@@ -21,25 +21,25 @@ public abstract class NBTi32 extends NBTNumber {
     /**
      * Creates an integer value of {@linkplain #GLOBAL_DEFAULT} with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     protected NBTi32() {super(GLOBAL_DEFAULT);}
     /**
      * Creates a integer value of {@linkplain #GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     protected NBTi32(final boolean minimal) {super(GLOBAL_DEFAULT,minimal);}
     /**
      * Creates a integer value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     protected NBTi32(final int value) {super(value);}
     /**
      * Creates a integer value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     protected NBTi32(final int value,final boolean minimal) {super(value,minimal);}
     
@@ -50,6 +50,7 @@ public abstract class NBTi32 extends NBTNumber {
     
     @Override protected boolean forceSuffix() {return SUFFIX_POLICY;}
     
+    /**@return <code>true</code> iff the provided suffix represents an i32 type.*/
     public static boolean isIntSuffix(final char c) {return NBTByte.isByteSuffix(c) || NBTShort.isShortSuffix(c);}
     
     /**
@@ -59,7 +60,7 @@ public abstract class NBTi32 extends NBTNumber {
      *               
      * @return The appropriate integral value.
      *               
-     * @throws NBTParsingException If the iterator cannot find a valid integral number.
+     * @throws NBTParsingException The iterator cannot find a valid integral number.
      */
     protected static NBTi32 parse(final SequenceIterator i,final char suffix) throws NBTParsingException {
         if(i.hasNext()) {

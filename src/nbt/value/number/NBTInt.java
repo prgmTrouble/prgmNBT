@@ -7,9 +7,11 @@ import nbt.value.NBTValue;
 import nbt.value.ValueType;
 
 /**
+ * A 32-bit integral value.
+ * 
  * @see NBTi32
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTInt extends NBTi32 {
@@ -23,30 +25,38 @@ public class NBTInt extends NBTi32 {
      * Creates an integer value of {@linkplain NBTi32#GLOBAL_DEFAULT} with default
      * minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTInt() {super();}
     /**
      * Creates an integer value of {@linkplain NBTi32#GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTInt(final boolean minimal) {super(minimal);}
     /**
      * Creates an integer value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTInt(final int value) {super(value);}
     /**
      * Creates an integer value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTInt(final int value,final boolean minimal) {super(value,minimal);}
-    /**Reads an integer value.*/
+    /**
+     * Reads this integer value.
+     * 
+     * @throws IOException The value could not be read.
+     */
     public NBTInt(final DataInput in) throws IOException {super(in.readInt());}
-    /**Writes this integer value.*/
+    /**
+     * Writes this integer value.
+     * 
+     * @throws IOException The value could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {out.writeInt(value.intValue());}
     

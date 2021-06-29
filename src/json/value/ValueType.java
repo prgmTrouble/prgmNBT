@@ -2,6 +2,12 @@ package json.value;
 
 import json.exception.JSONConversionException;
 
+/**
+ * 
+ * 
+ * 
+ * @author prgmTrouble
+ */
 public enum ValueType {
     NULL,
     BOOL,

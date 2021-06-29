@@ -5,7 +5,7 @@ import java.lang.reflect.Array;
 /**
  * A lightweight singly-linked list implementation.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public abstract class Container<V> implements Iterable<V> {
@@ -150,7 +150,7 @@ public abstract class Container<V> implements Iterable<V> {
      * 
      * @see #toArray(V[])
      */
-    public V[] toArray() {
+    public V[] toArray() throws NullPointerException {
         final V[] arr = infer();
         unsafeToArray(arr);
         return arr;
@@ -165,7 +165,7 @@ public abstract class Container<V> implements Iterable<V> {
      *                              
      * @see #toArray()
      */
-    public V[] toArray(V[] arr) {
+    public V[] toArray(V[] arr) throws NullPointerException {
         arr = ensure(arr);
         unsafeToArray(arr);
         return arr;

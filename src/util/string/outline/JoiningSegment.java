@@ -6,27 +6,51 @@ import util.string.Joiner;
 import util.string.Sequence;
 import util.string.SequenceQueue;
 
+/**
+ * A {@linkplain Segment} which separates its children with a constant sequence.
+ * Additionally, it provides controls which add line breaks when the character
+ * or child limit is reached.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class JoiningSegment extends Segment {
     private Queue<Segment> children = new Queue<>();
     private final Sequence separator;
     private int totalSize = 0;
     private int childLimit = Settings.defaultFoldedChildLimit();
     
+    /**
+     * Creates a joining segment.
+     * 
+     * @param separator A sequence which will be inserted between every adjacent
+     *                  pair of children. A value of <code>null</code> yields an
+     *                  empty separator.
+     */
     public JoiningSegment(final Sequence separator) {
         super();
-        this.separator = separator;
+        this.separator = separator == null? Sequence.EMPTY : separator;
     }
     
+    /**@return The maximum number of children per folded line (unsigned).*/
     public int childLimit() {return childLimit;}
+    /**@param childLimit The maximum number of children per folded line (unsigned).*/
     public JoiningSegment childLimit(final int childLimit) {
         this.childLimit = childLimit;
         return this;
     }
     
+    /**
+     * @param child The child segment. Any <code>null</code> values are skipped.
+     * 
+     * @return <code>this</code>
+     */
     public JoiningSegment push(final Segment child) {
-        totalSize += child.size();
-        if(children.push(child).size() > 1)
-            totalSize += separator.length();
+        if(child != null) {
+            totalSize += child.size();
+            if(children.push(child).size() > 1)
+                totalSize += separator.length();
+        }
         return this;
     }
     
@@ -109,36 +133,3 @@ public class JoiningSegment extends Segment {
         return new Sequence[] {line.concat()};
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

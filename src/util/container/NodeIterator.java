@@ -5,7 +5,7 @@ import java.util.Iterator;
 /**
  * An iterator which traverses nodes in a {@linkplain Container}.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NodeIterator<V> implements Iterator<V> {

@@ -3,7 +3,7 @@ package util.string;
 /**
  * A {@linkplain Builder} which separates strings using a separator.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class Joiner extends SequenceQueue {
@@ -66,7 +66,9 @@ public class Joiner extends SequenceQueue {
      * @param separator A character sequence separating the strings.
      */
     public Joiner(final Sequence separator) {
-        wrapper = new Sequence[] {Sequence.EMPTY,Sequence.EMPTY,separator};
+        wrapper = new Sequence[] {Sequence.EMPTY,
+                                  Sequence.EMPTY,
+                                  separator == null? Sequence.EMPTY : separator};
     }
     /**
      * @param wrapper The sequences to use, in the order prefix, suffix, separator.

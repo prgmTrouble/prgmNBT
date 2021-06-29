@@ -3,23 +3,32 @@ package util.string;
 import util.container.Container;
 import util.container.Queue;
 
+/**
+ * A {@linkplain Queue} of {@linkplain Sequence}s which functions as a builder.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class SequenceQueue extends Queue<Sequence> implements Builder {
     private int totalSize = 0;
     
     @SuppressWarnings("unchecked") @Override
     public SequenceQueue push(final Sequence v) {
-        totalSize += v.length();
+        if(v != null) totalSize += v.length();
         return super.push(v);
     }
     @SuppressWarnings("unchecked") @Override
     public SequenceQueue push(final Sequence...v) {
-        if(v != null) for(final Sequence s : v) totalSize += s.length();
+        if(v != null)
+            for(final Sequence s : v)
+                if(s != null)
+                    totalSize += s.length();
         return super.push(v);
     }
     @Override
     public Sequence pop() {
         final Sequence out = super.pop();
-        totalSize -= out.length();
+        if(out != null) totalSize -= out.length();
         return out;
     }
     
@@ -35,7 +44,7 @@ public class SequenceQueue extends Queue<Sequence> implements Builder {
     @Override
     public <T extends Container<Sequence>> SequenceQueue merge(final T o) {
         if(o instanceof SequenceQueue) totalSize += ((SequenceQueue)o).totalSize;
-        else for(final Sequence s : this) totalSize += s.length();
+        else if(o != null) for(final Sequence s : this) if(s != null) totalSize += s.length();
         return (SequenceQueue)super.merge(o);
     }
     
@@ -51,7 +60,7 @@ public class SequenceQueue extends Queue<Sequence> implements Builder {
         if(empty()) return Sequence.EMPTY;
         final char[] buf = new char[totalSize];
         int cursor = 0;
-        for(final Sequence s : this) cursor = s.copyInto(buf,cursor);
+        for(final Sequence s : this) if(s != null) cursor = s.copyInto(buf,cursor);
         return new Sequence(buf);
     }
 }

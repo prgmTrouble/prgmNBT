@@ -3,7 +3,7 @@ package nbt.value.collection;
 import java.io.DataOutput;
 import java.io.IOException;
 import nbt.NBT;
-import nbt.exception.NBTConversionException;
+import nbt.exception.NBTException;
 import nbt.exception.NBTParsingException;
 import nbt.value.NBTValue;
 import settings.Version;
@@ -17,7 +17,7 @@ import util.string.outline.WrappingSegment;
 /**
  * An {@linkplain NBTValue} which holds other {@linkplain NBT}s.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public abstract class NBTCollection<K,V extends NBT> extends NBTValue implements Iterable<V> {
@@ -27,7 +27,7 @@ public abstract class NBTCollection<K,V extends NBT> extends NBTValue implements
     /**
      * Creates an empty collection with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTCollection() {super();}
     /**
@@ -35,21 +35,29 @@ public abstract class NBTCollection<K,V extends NBT> extends NBTValue implements
      * 
      * @param minimal {@linkplain NBTValue#minimal}
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTCollection(final boolean minimal) {super(minimal);}
     
-    /**Writes this collection's values.*/
+    /**
+     * Writes this collection's values.
+     * 
+     * @throws IOException The collection could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {
         for(final V v : this) v.write(out);
     }
     
-    /**Maps the element to the key.*/
-    public abstract NBTCollection<K,V> set(final K key,final NBTValue element) throws NBTConversionException;
-    /**Gets an element mapped to the key.*/
+    /**
+     * Maps the value to the key.
+     * 
+     * @throws NBTException The key or value could not be set.
+     */
+    public abstract NBTCollection<K,V> set(final K key,final NBTValue value) throws NBTException;
+    /**Gets an value mapped to the key.*/
     public abstract NBTValue get(final K key);
-    /**Removes and returns the element mapped to the key.*/
+    /**Removes and returns the value mapped to the key.*/
     public abstract NBTValue remove(final K key);
     
     /**Gets a {@linkplain Joiner} instance to use when converting to a character sequence.*/

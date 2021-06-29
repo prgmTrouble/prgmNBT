@@ -12,13 +12,11 @@ import util.container.NodeIterator;
 import util.container.Stack;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
-import util.string.outline.Segment;
-import util.string.outline.ValueSegment;
 
 /**
- * A {@linkplain NBTValue} holding a string.
+ * An {@linkplain NBTValue} holding a string.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTString extends NBTValue implements Comparable<NBTString> {
@@ -46,8 +44,10 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @see Version#v19w08a
      */
     public static final boolean SINGLE_QUOTES_ENABLED = Version.atLeast(Version.v19w08a);
+    /**@return <code>true</code> iff the character matches a valid string wrapper.*/
     public static boolean isStringWrapper(final char c) {return Sequence.isStringWrapper(c,SINGLE_QUOTES_ENABLED);}
     
+    /**@return <code>true</code> iff the character whitespace or not an ISO control character.*/
     public static final boolean isPrintable(final char c) {
         return Character.isWhitespace(c) || !Character.isISOControl(c);
     }
@@ -61,14 +61,13 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
     
     public static final Sequence GLOBAL_DEFAULT = Sequence.EMPTY;
     public static final char DEFAULT_QUOTE_STYLE = '"';
-    // Access is protected to avoid null values.
     protected Sequence value,localDefault = GLOBAL_DEFAULT;
     protected char quoteStyle = DEFAULT_QUOTE_STYLE;
     
     /**
      * Creates an {@linkplain #GLOBAL_DEFAULT} string value with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTString() {super(); value = GLOBAL_DEFAULT;}
     /**
@@ -76,7 +75,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * 
      * @param minimal {@linkplain NBTValue#minimal}
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTString(final boolean minimal) {super(minimal); value = GLOBAL_DEFAULT;}
     /**
@@ -84,7 +83,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * 
      * @param value Initial value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTString(final char[] value) throws NBTParsingException {super(); setValue(value);}
     /**
@@ -93,7 +92,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param value   Initial value.
      * @param minimal {@linkplain NBTValue#minimal}
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTString(final char[] value,final boolean minimal) throws NBTParsingException {super(minimal); setValue(value);}
     /**
@@ -101,7 +100,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * 
      * @param value Initial value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTString(final Sequence value) throws NBTParsingException {super(); setValue(value);}
     /**
@@ -110,7 +109,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param value   Initial value.
      * @param minimal {@linkplain NBTValue#minimal}
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTString(final Sequence value,final boolean minimal) throws NBTParsingException {super(minimal); setValue(value);}
     /**
@@ -118,7 +117,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * 
      * @param value Initial value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTString(final String value) throws NBTParsingException {super(); setValue(value);}
     /**
@@ -127,7 +126,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param value   Initial value.
      * @param minimal {@linkplain NBTValue#minimal}
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTString(final String value,final boolean minimal) throws NBTParsingException {super(minimal); setValue(value);}
     /**Reads a string value.*/
@@ -143,16 +142,23 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         value = eatSequence(i,null);
         // Determine if string is wrapped.
         if(!(minimal = !(value.isWrappedIn('"') || SINGLE_QUOTES_ENABLED && value.isWrappedIn('\''))))
-            value = value.unwrapAndUnescape(); //TODO test change
+            value = value.unwrapAndUnescape();
     }
     
+    /**
+     * @param single <code>true</code> iff the quote style should be single
+     *               (<code>'</code>,<code>\u0027</code>) or double
+     *               (<code>"</code>,<code>\u0022</code>) quotes.
+     *               
+     * @return <code>this</code>
+     */
     public NBTString setQuoteStyle(final boolean single) {
         if(SINGLE_QUOTES_ENABLED && single) quoteStyle = '\'';
         return this;
     }
     
-    private static <V> V checkNN(final V value) throws NullPointerException {
-        if(value == null) throw new NullPointerException("Cannot assign a null value.");
+    private static <V> V checkNN(final V value) throws NBTParsingException {
+        if(value == null) throw new NBTParsingException("Cannot assign a null value.");
         return value;
     }
     
@@ -381,27 +387,69 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
             : value;
     }
     
+    /**
+     * @param value This string's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
     public NBTString setValue(final Sequence value) throws NBTParsingException {
         this.value = validate(checkNN(value));
         return this;
     }
+    /**
+     * @param value This string's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
     public NBTString setValue(final char...value) throws NBTParsingException {
         this.value = checkNN(value).length == 0? EMPTY : validate(new Sequence(value));
         return this;
     }
+    /**
+     * @param value This string's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
     public NBTString setValue(final String value) throws NBTParsingException {
         this.value = checkNN(value).isEmpty()? EMPTY : validate(new Sequence(value));
         return this;
     }
     
+    /**
+     * @param value This string's default value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
     public NBTString setDefault(final Sequence value) throws NBTParsingException {
         localDefault = validate(checkNN(value));
         return this;
     }
+    /**
+     * @param value This string's default value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
     public NBTString setDefault(final char...value) throws NBTParsingException {
         localDefault = checkNN(value).length == 0? EMPTY : validate(new Sequence(value));
         return this;
     }
+    /**
+     * @param value This string's default value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
     public NBTString setDefault(final String value) throws NBTParsingException {
         localDefault = checkNN(value).isEmpty()? EMPTY : validate(new Sequence(value));
         return this;
@@ -480,9 +528,9 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         // Must wrap if contains an un-wrappable character.
         return !minimal || forceWrap(value)? complete() : minimal();
     }
-    @Override public Segment toSegment() {return new ValueSegment(toSequence());}
     
     @Override public int compareTo(final NBTString o) {return value.compareTo(o.value);}
+    /**@see NBTString#equals(Object)*/
     public boolean equals(final Sequence s) {return value.equals(s);}
     @Override
     public boolean equals(final Object obj) {
@@ -506,7 +554,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * 
      * @return The appropriate {@linkplain NBTNumber}.
      * 
-     * @throws NBTParsingException If the iterator cannot find a valid number.
+     * @throws NBTParsingException The iterator cannot find a valid number.
      */
     public static NBTString parse(final SequenceIterator i,
                                   final Character terminator,
@@ -519,7 +567,7 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
         // Bypass constructor checks.
         final NBTString s = new NBTString();
         s.value = str.isWrappedIn('"') || SINGLE_QUOTES_ENABLED && str.isWrappedIn('\'')
-                ? str.unwrapAndUnescape() //TODO test change
+                ? str.unwrapAndUnescape()
                 : str;
         return s;
     }

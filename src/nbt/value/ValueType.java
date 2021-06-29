@@ -21,32 +21,59 @@ import nbt.value.number.NBTNumber;
 import nbt.value.number.NBTShort;
 import settings.Version;
 
+/**
+ * An enumeration of value types. In addition to identification, these also help
+ * with type conversions and reading from binary files.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public enum ValueType {
+    /**@see NBTByte*/
     BYTE      ( 1,in -> new NBTByte     (in),"Byte"),
+    /**@see NBTShort*/
     SHORT     ( 2,in -> new NBTShort    (in),"Short"),
+    /**@see NBTInt*/
     INT       ( 3,in -> new NBTInt      (in),"Int"),
+    /**@see NBTLong*/
     LONG      ( 4,in -> new NBTLong     (in),"Long"),
+    /**@see NBTFloat*/
     FLOAT     ( 5,in -> new NBTFloat    (in),"Float"),
+    /**@see NBTDouble*/
     DOUBLE    ( 6,in -> new NBTDouble   (in),"Double"),
+    /**@see NBTBool*/
     BOOL      ( 1,in -> new NBTBool     (in),"Bool"),
+    /**@see NBTString*/
     STRING    ( 8,in -> new NBTString   (in),"String"),
+    /**@see NBTObject*/
     OBJECT    (10,in -> new NBTObject   (in),"Compound"),
+    /**@see NBTArray*/
     ARRAY     ( 9,in -> new NBTArray    (in),"List"),
+    /**@see NBTByteArray*/
     BYTE_ARRAY( 7,in -> new NBTByteArray(in),"Byte Array"),
+    /**@see NBTIntArray*/
     INT_ARRAY (11,in -> new NBTIntArray (in),"Int Array"),
+    /**@see NBTLongArray*/
     LONG_ARRAY(12,in -> new NBTLongArray(in),"Long Array");
     
     private static interface Reader {NBTValue read(final DataInput in) throws IOException,NBTException;}
     
     private final Reader reader;
+    /**A human-friendly name for this type.*/
     public final String name;
+    /**The numeric id of this type.*/
     public final int id;
+    
     private ValueType(final int id,final Reader reader,final String name) {
         this.id = id;
         this.reader = reader;
         this.name = name;
     }
-    /**Reads a value of this type.*/
+    /**
+     * Reads a value of this type.
+     * 
+     * @throws NBTException The value could not be read for any reason.
+     */
     public NBTValue read(final DataInput in) throws NBTException {
         try {return reader.read(in);}
         catch(final IOException e) {
@@ -64,6 +91,8 @@ public enum ValueType {
      * @param target Type of conversion result.
      * 
      * @return The converted value.
+     * 
+     * @throws NBTConversionException The value could not be converted.
      */
     public static NBTValue convert(final NBTValue value,
                                    final ValueType target)
@@ -86,7 +115,7 @@ public enum ValueType {
         throw new NBTConversionException(type,target);
     }
     
-    /**Converts a byte id into a type.*/
+    /**Converts a byte id into a type, or <code>null</code> iff no type with that id exists.*/
     public static ValueType getType(final byte i) {
         return switch(i) {
             case  1 -> BYTE;
@@ -104,21 +133,20 @@ public enum ValueType {
             default -> null;
         };
     }
-    /**Reads a complete value.*/
+    
+    /**
+     * Reads a complete value.
+     * 
+     * @throws NBTException The value contained an unknown type or
+     *                      {@linkplain #read(DataInput)} could not read the input.
+     */
     public static NBTValue infer(final DataInput in) throws NBTException {
         final ValueType v;
         {
             final byte b;
             try {b = in.readByte();}
-            catch(final IOException e) {
-                throw new NBTException(
-                    "Could not read value type.",e
-                );
-            }
-            if((v = getType(b)) == null)
-                throw new NBTException(
-                    "Unknown type %d.".formatted(b)
-                );
+            catch(final IOException e) {throw new NBTException("Could not read value type.",e);}
+            if((v = getType(b)) == null) throw new NBTException("Unknown type %d.".formatted(b));
         }
         return v.read(in);
     }

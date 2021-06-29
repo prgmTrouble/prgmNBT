@@ -9,7 +9,7 @@ import util.string.Sequence.SequenceIterator;
 /**
  * An exception class which is thrown during operations on NBT objects.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTParsingException extends NBTException {

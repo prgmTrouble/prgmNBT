@@ -17,9 +17,11 @@ public interface Stringifiable {
      * @param b {@linkplain Builder}
      * 
      * @return <code>b</code>
+     * 
+     * @throws NullPointerException
      */
     @SuppressWarnings("unchecked")
-    public default <B extends Builder> B appendTo(final B b) {
+    public default <B extends Builder> B appendTo(final B b) throws NullPointerException {
         return (B)b.push(toSequence());
     }
     

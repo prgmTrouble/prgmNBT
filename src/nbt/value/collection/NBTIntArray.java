@@ -11,7 +11,7 @@ import util.string.Joiner;
 /**
  * An {@linkplain NBTPrimitiveArray} which holds {@linkplain NBTInt} values.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTIntArray extends NBTPrimitiveArray {
@@ -24,16 +24,25 @@ public class NBTIntArray extends NBTPrimitiveArray {
     /**
      * Creates an empty int array with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     public NBTIntArray() throws NBTException {super(TOKEN.subtype);}
     /**
      * Creates an empty int array.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     public NBTIntArray(final boolean minimal) throws NBTException {super(TOKEN.subtype,minimal);}
-    /**Reads an int array.*/
+    /**
+     * Reads an int array.
+     * 
+     * @throws IOException The array could not be read.
+     * @throws NBTException Primitive arrays are not enabled in this version.
+     */
     public NBTIntArray(final DataInput in) throws IOException,NBTException {
         this();
         final int l = in.readInt();
@@ -41,6 +50,11 @@ public class NBTIntArray extends NBTPrimitiveArray {
             add(new NBTInt(in.readInt()));
     }
     
+    /**
+     * Adds all the values to the array.
+     * 
+     * @return <code>this</code>
+     */
     public NBTIntArray addAll(final int...elements) {
         if(elements != null && elements.length != 0)
             for(final int e : elements) values.add(new NBTInt(e));

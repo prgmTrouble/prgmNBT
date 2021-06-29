@@ -7,28 +7,61 @@ import util.container.NodeIterator;
 import util.container.Stack;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
-import util.string.outline.Segment;
 
+/**
+ * A {@linkplain JSONValue} holding a string.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class JSONString extends JSONValue {
     public static final ValueType TYPE = ValueType.STRING;
+    @Override public ValueType type() {return TYPE;}
     
     private Sequence value = Sequence.EMPTY;
     private boolean escapeUnicode = Settings.escapeUnicodeByDefault();
     
+    /**Creates an empty string value.*/
     public JSONString() {super();}
+    /**
+     * Creates a string value.
+     * 
+     * @throws JSONException The value is <code>null</code> or otherwise invalid.
+     */
     public JSONString(final Sequence value) throws JSONException {super(); value(value);}
+    /**
+     * Creates a string value.
+     * 
+     * @throws JSONException The value is <code>null</code> or otherwise invalid.
+     */
     public JSONString(final char...value) throws JSONException {super(); value(value);}
+    /**
+     * Creates a string value.
+     * 
+     * @throws JSONException The value is <code>null</code> or otherwise invalid.
+     */
     public JSONString(final String value) throws JSONException {super(); value(value);}
     
+    /**
+     * @return <code>true</code> iff values larger than <code>'\u007F'</code> will
+     *         be converted into escaped unicode sequences.
+     */
     public boolean escapeUnicode() {return escapeUnicode;}
+    /**
+     * @param escapeUnicode <code>true</code> iff values larger than <code>'\u007F'</code> will
+     *         be converted into escaped unicode sequences.
+     * 
+     * @return <code>this</code>
+     */
     public JSONString escapeUnicode(final boolean escapeUnicode) {
         this.escapeUnicode = escapeUnicode;
         return this;
     }
     
+    /**@return This string's value.*/
     public Sequence value() {return value;}
-    private static <V> V checkNN(final V v) {
-        if(v == null) throw new NullPointerException("Cannot assign a null value.");
+    private static <V> V checkNN(final V v) throws JSONException {
+        if(v == null) throw new JSONException("Cannot assign a null value.");
         return v;
     }
     private static final char toHexChar(int c) {return (char)((c &= 0xF) > 9? c - 10 + 'A' : ('0' + c));}
@@ -36,7 +69,7 @@ public class JSONString extends JSONValue {
                                         final Character terminator,
                                         final boolean escapeUnicode,
                                         final boolean checkQuotes)
-                                        throws JSONParsingException {
+                                        throws JSONParsingException { //TODO test
         final Character wrapper = i.skipWS();
         if(wrapper == null) throw new JSONParsingException("Empty sequence",i);
         i.mark();
@@ -134,65 +167,42 @@ public class JSONString extends JSONValue {
         return value.isWrappedIn('"')? value.unwrapAndUnescape()
                                      : value;
     }
-    private JSONString internalSetV(final Sequence value) throws JSONParsingException {
+    private JSONString internalSetV(final Sequence value) throws JSONException {
         this.value = validate(value,escapeUnicode);
         return this;
     }
-    public JSONString value(final Sequence value) throws JSONParsingException {
+    /**
+     * @param value This string's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws JSONException The value is <code>null</code> or otherwise invalid.
+     */
+    public JSONString value(final Sequence value) throws JSONException {
         return internalSetV(checkNN(value));
     }
-    public JSONString value(final char...value) throws JSONParsingException {
+    /**
+     * @param value This string's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws JSONException The value is <code>null</code> or otherwise invalid.
+     */
+    public JSONString value(final char...value) throws JSONException {
         return internalSetV(new Sequence(checkNN(value)));
     }
-    public JSONString value(final String value) throws JSONParsingException {
+    /**
+     * @param value This string's value.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws JSONException The value is <code>null</code> or otherwise invalid.
+     */
+    public JSONString value(final String value) throws JSONException {
         return internalSetV(new Sequence(checkNN(value)));
     }
     
-    @Override
-    public Sequence toSequence() {
-        return null;
-    }
-    
-    @Override
-    public Segment toSegment() {
-        return null;
-    }
-    
-    @Override public ValueType type() {return TYPE;}
+    @Override public Sequence toSequence() {return value;}
     
     //TODO parsing (use eatSequence with checkQuotes true)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

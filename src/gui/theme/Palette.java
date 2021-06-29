@@ -95,7 +95,8 @@ public class Palette {
         public final Color color,light,dark;
         public PaletteColor(final Color color,
                             final Color light,
-                            final Color dark) {
+                            final Color dark)
+                            throws IllegalArgumentException {
             if((this.color = color) == null)
                 throw new IllegalArgumentException(
                     "Cannot instantiate a null color."
@@ -103,7 +104,7 @@ public class Palette {
             this.light = light;
             this.dark = dark;
         }
-        public PaletteColor(final Color color) {
+        public PaletteColor(final Color color) throws IllegalArgumentException {
             if((this.color = color) == null)
                 throw new IllegalArgumentException(
                     "Cannot instantiate a null color."

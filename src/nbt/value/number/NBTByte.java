@@ -7,9 +7,11 @@ import nbt.value.NBTValue;
 import nbt.value.ValueType;
 
 /**
+ * An 8-bit integral value.
+ * 
  * @see NBTi32
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTByte extends NBTi32 {
@@ -23,42 +25,50 @@ public class NBTByte extends NBTi32 {
      * Creates a byte value of {@linkplain NBTi32#GLOBAL_DEFAULT} with default
      * minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTByte() {super();}
     /**
      * Creates a byte value of {@linkplain NBTi32#GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTByte(final boolean minimal) {super(minimal);}
     /**
      * Creates a byte value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTByte(final byte value) {super(value);}
     /**
      * Creates a byte value default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTByte(final int value) {super(value);}
     /**
      * Creates a byte value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTByte(final byte value,final boolean minimal) {super(value,minimal);}
     /**
      * Creates a byte value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTByte(final int value,final boolean minimal) {super(value,minimal);}
-    /**Reads a byte value.*/
+    /**
+     * Reads a byte value.
+     * 
+     * @throws IOException The value could not be read.
+     */
     public NBTByte(final DataInput in) throws IOException {super(in.readByte());}
-    /**Writes this byte value.*/
+    /**
+     * Writes this byte value.
+     * 
+     * @throws IOException The value could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {out.writeByte(value.intValue());}
     

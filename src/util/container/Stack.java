@@ -3,7 +3,7 @@ package util.container;
 /**
  * A LIFO implementation of {@linkplain Container}.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class Stack<V> extends Container<V> {

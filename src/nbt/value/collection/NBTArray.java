@@ -25,7 +25,7 @@ import util.string.outline.WrappingSegment;
  * An {@linkplain NBTCollection} which holds a list of values with the same
  * type.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTArray extends NBTCollection<Integer,NBTValue> {
@@ -55,7 +55,7 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
     /**
      * Creates an empty array with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTArray() {super();}
     /**
@@ -63,10 +63,15 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
      * 
      * @param minimal {@linkplain NBTValue#minimal}
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTArray(final boolean minimal) {super(minimal);}
-    /**Reads an array.*/
+    /**
+     * Reads an array.
+     * 
+     * @throws IOException The array could not be read.
+     * @throws NBTException The array is invalid.
+     */
     public NBTArray(final DataInput in) throws IOException,NBTException {
         super();
         final int l;
@@ -105,13 +110,15 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
      * element's type. The argument must not be null.
      * 
      * @return The converted element, or <code>null</code> if the conversion failed.
+     * 
+     * @throws NBTConversionException The value could not be converted.
      */
-    protected NBTValue adopt(final NBTValue element) throws NBTConversionException {
-        if(subtype == null) {subtype = element.type(); return element;}
-        if(subtype == element.type()) return element;
+    protected NBTValue adopt(final NBTValue value) throws NBTConversionException {
+        if(subtype == null) {subtype = value.type(); return value;}
+        if(subtype == value.type()) return value;
         if(THE_WILD_WEST) return null;
         if(ADOPTION) {
-            try {return element.convertTo(subtype);}
+            try {return value.convertTo(subtype);}
             catch(final NBTConversionException e) {
                 if(!RETROACTIVE_ADOPTION)
                     throw new NBTConversionException(
@@ -120,7 +127,7 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
             }
             // Retroactive adoption is implicitly active.
             final ArrayList<NBTValue> copy = new ArrayList<>(values.size() + 1);
-            final ValueType t = element.type();
+            final ValueType t = value.type();
             try {for(final NBTValue v : values) copy.add(v.convertTo(t));}
             catch(final NBTConversionException e) {
                 throw new NBTConversionException(
@@ -129,35 +136,45 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
             }
             values = copy;
             subtype = t;
-            return element;
+            return value;
             // Technically, it would be possible to try and find a set intersection
-            // between convertible types, but I'll leave that alone until it's needed.
+            // between convertible types, but that will be implemented if it's needed.
         }
         throw new NBTConversionException(
             "Could not assign a value of type \"%s\" to an array of type \"%s\"."
-            .formatted(element.type(),subtype)
+            .formatted(value.type(),subtype)
         );
     }
     
+    /**
+     * @throws NBTConversionException The value could not be converted.
+     * @throws IllegalArgumentException The key is <code>null</code> or out of bounds.
+     */
     @Override
-    public NBTArray set(final Integer key,NBTValue element) throws NBTConversionException {
+    public NBTArray set(final Integer key,NBTValue value) throws NBTConversionException,
+                                                                 IllegalArgumentException {
         if(key == null || values.size() < key || key < 0)
             throw new IllegalArgumentException(String.format(
                 "Cannot set value at position %s (size = %d).",
                 key,values.size()
             ));
-        if((element = adopt(element)) != null)
-            values.add(key,element);
+        if((value = adopt(value)) != null)
+            values.add(key,value);
         return this;
     }
-    /**Appends the element to the last index.*/
+    /**
+     * Appends the element to the last index.
+     * 
+     * @throws NBTConversionException The value could not be converted.
+     */
     public NBTArray add(NBTValue element) throws NBTConversionException {
         if((element = adopt(element)) != null)
             values.add(element);
         return this;
     }
+    /**@throws IllegalArgumentException The key is <code>null</code> or out of bounds.*/
     @Override
-    public NBTValue get(final Integer key) {
+    public NBTValue get(final Integer key) throws IllegalArgumentException {
         if(key == null || values.size() <= key || key < 0)
             throw new IllegalArgumentException(String.format(
                 "Cannot get value at position %s (size = %d).",
@@ -165,8 +182,9 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
             ));
         return values.get(key);
     }
+    /**@throws IllegalArgumentException The key is <code>null</code> or out of bounds.*/
     @Override
-    public NBTValue remove(final Integer key) {
+    public NBTValue remove(final Integer key) throws IllegalArgumentException {
         if(key == null || values.size() <= key || key < 0)
             throw new IllegalArgumentException(String.format(
                 "Cannot remove value at position %s (size = %d).",
@@ -225,7 +243,7 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
      * 
      * @return An {@linkplain NBTArray}.
      * 
-     * @throws NBTParsingException If the iterator cannot find a valid array.
+     * @throws NBTParsingException The iterator cannot find a valid array.
      */
     public static NBTArray parse(final SequenceIterator i,
                                  final Character terminator,
@@ -249,7 +267,7 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
                     if(c == ',') continue; // Empty values permitted.
                     if(c == CLOSE) break;
                     final NBT nbt = NBT.parse(i,CLOSE,true);
-                    arr.add(nbt instanceof NBTTag? ((NBTTag)nbt).value : (NBTValue)nbt);
+                    arr.add(nbt instanceof NBTTag? ((NBTTag)nbt).value() : (NBTValue)nbt);
                     if(i.peek() == CLOSE) break;
                 }
             } else {

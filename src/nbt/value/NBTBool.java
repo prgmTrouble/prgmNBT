@@ -16,7 +16,7 @@ import util.string.Sequence;
 /**
  * A {@linkplain NBTValue} holding a boolean.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTBool extends NBTByte {
@@ -30,8 +30,9 @@ public class NBTBool extends NBTByte {
      */
     public static final boolean STRING_OUTPUT = Version.atLeast(Version.unknown);
     
-    public static final Sequence TRUE_SEQUENCE,FALSE_SEQUENCE;
-    public static final Sequence TRUE_BYTE,FALSE_BYTE;
+    public static final Sequence TRUE_SEQUENCE,FALSE_SEQUENCE,
+                                 TRUE_BYTE,FALSE_BYTE,
+                                 TRUE_BYTE_MIN,FALSE_BYTE_MIN;
     static {
         final String True = Boolean.toString(true),False = Boolean.toString(false),
                      TrueB = Byte.toString((byte)1) + 'b',FalseB = Byte.toString((byte)0) + 'b';
@@ -43,31 +44,36 @@ public class NBTBool extends NBTByte {
         );
         TRUE_SEQUENCE = share[0];
         FALSE_SEQUENCE = share[1];
-        TRUE_BYTE = share[2];
-        FALSE_BYTE = share[3];
+        TRUE_BYTE = share[2]; TRUE_BYTE_MIN = TRUE_BYTE.subSequence(0,1);
+        FALSE_BYTE = share[3]; FALSE_BYTE_MIN = FALSE_BYTE.subSequence(0,1);
     }
     
     /**
      * Creates a boolean value of {@linkplain #GLOBAL_DEFAULT} (<code>false</code>).
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTBool() {super();}
     /**
      * Creates a boolean value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTBool(final boolean value) {super(value? 1 : 0);}
     /**
      * Creates a boolean value.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTBool(final byte value) {super(value != 0? 1 : 0);}
-    /**Reads a boolean value.*/
+    /**
+     * Reads a boolean value.
+     * 
+     * @throws IOException The input cannot be read.
+     */
     public NBTBool(final DataInput in) throws IOException {this(in.readBoolean());}
     
+    /**@return The value of this boolean value.*/
     public boolean getValue() {return value.intValue() != 0;}
     
     @Override
@@ -106,10 +112,11 @@ public class NBTBool extends NBTByte {
             ? (STRING_OUTPUT? TRUE_SEQUENCE : TRUE_BYTE)
             : (STRING_OUTPUT? FALSE_SEQUENCE : FALSE_BYTE);
     }
-    @Override protected Sequence minimal() {return getValue()? TRUE_SEQUENCE : FALSE_SEQUENCE;}
+    @Override protected Sequence minimal() {return getValue()? TRUE_BYTE_MIN : FALSE_BYTE_MIN;}
     
     @Override public Sequence toSequence() {return minimal? minimal() : complete();}
     
+    @Override
     public NBTValue convertTo(final ValueType type) throws NBTConversionException {
         try {
             return switch(type) {

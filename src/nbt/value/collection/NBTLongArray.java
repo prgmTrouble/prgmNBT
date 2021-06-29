@@ -11,7 +11,7 @@ import util.string.Joiner;
 /**
  * An {@linkplain NBTPrimitiveArray} which holds {@linkplain NBTLong} values.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTLongArray extends NBTPrimitiveArray {
@@ -24,16 +24,25 @@ public class NBTLongArray extends NBTPrimitiveArray {
     /**
      * Creates an empty long array with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     public NBTLongArray() throws NBTException {super(TOKEN.subtype);}
     /**
      * Creates an empty long array.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     public NBTLongArray(final boolean minimal) throws NBTException {super(TOKEN.subtype,minimal);}
-    /**Reads an long array.*/
+    /**
+     * Reads an long array.
+     * 
+     * @throws IOException The array could not be read.
+     * @throws NBTException Primitive arrays are not enabled in this version.
+     */
     public NBTLongArray(final DataInput in) throws IOException,NBTException {
         this();
         final int l = in.readInt();
@@ -41,6 +50,11 @@ public class NBTLongArray extends NBTPrimitiveArray {
             add(new NBTLong(in.readLong()));
     }
     
+    /**
+     * Adds all the values to the array.
+     * 
+     * @return <code>this</code>
+     */
     public NBTLongArray addAll(final long...elements) {
         if(elements != null && elements.length != 0)
             for(final long e : elements) values.add(new NBTLong(e));

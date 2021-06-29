@@ -18,15 +18,23 @@ import nbt.exception.NBTParsingException;
 import nbt.value.NBTString;
 import nbt.value.NBTValue;
 import nbt.value.ValueType;
+import nbt.value.number.NBTNumber;
 import util.container.Container;
 import util.string.Joiner;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
 import util.string.outline.WrappingSegment;
 
+/**
+ * An {@linkplain NBTCollection} which functions as a map.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public class NBTObject extends NBTCollection<NBTString,NBTTag> {
     public static final ValueType TYPE = ValueType.OBJECT;
     @Override public ValueType type() {return TYPE;}
+    /**The byte that marks the end of NBT objects in binary files.*/
     public static final byte END_BYTE = 0;
     
     public static final char OPEN = '{',CLOSE = '}';
@@ -55,7 +63,12 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
         super();
         for(final NBTTag tag : tags) set(tag);
     }
-    /**Reads an object.*/
+    /**
+     * Reads an object.
+     * 
+     * @throws IOException The object could not be read.
+     * @throws NBTException The object is invalid.
+     */
     public NBTObject(final DataInput in) throws IOException,NBTException {
         super();
         for(byte id = in.readByte();id != END_BYTE;id = in.readByte())
@@ -69,6 +82,14 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
             )
         );
     }
+    /**
+     * Reads an object from a binary file.
+     * 
+     * @param compressed <code>true</code> iff the file is in a GZIP compressed format.
+     * 
+     * @throws IOException  The file could not be read.
+     * @throws NBTException The object is invalid.
+     */
     public NBTObject(final File in,final boolean compressed) throws IOException,NBTException {
         super();
         final DataInput i = stream(in,compressed);
@@ -86,40 +107,88 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
         for(byte id = i.readByte();id != END_BYTE;id = i.readByte())
             set(new NBTTag(i,id));
     }
-    /**Writes this object value.*/
+    /**
+     * Writes this object value.
+     * 
+     * @throws IOException The object could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {
         super.write(out);
         out.writeByte(END_BYTE);
     }
     
+    /**@throws IllegalArgumentException The key is empty.*/
     @Override
-    public NBTObject set(final NBTString key,final NBTValue element) {
+    public NBTObject set(final NBTString key,final NBTValue value) throws NullPointerException,
+                                                                          IllegalArgumentException {
         if(key == null)
             throw new NullPointerException("Key is null.");
-        if(element == null)
+        if(value == null)
             throw new NullPointerException("Value is null.");
         if(key.unwrapped().stripLeading().isEmpty())
             throw new IllegalArgumentException("Key is empty.");
         
-        values.put(key,element);
+        values.put(key,value);
         return this;
     }
-    public NBTObject set(final Sequence key,final NBTValue element) throws NBTParsingException {
-        return set(new NBTString(key),element);
-    }
-    public NBTObject set(final String key,final NBTValue element) throws NBTParsingException {
-        return set(new NBTString(key),element);
-    }
-    public NBTObject set(final NBTTag entry) {values.put(entry.key,entry.value); return this;}
     
-    @Override public NBTValue get(final NBTString key) {return values.get(key);}
-    public NBTValue get(final Sequence key) throws NBTParsingException {return values.get(new NBTString(key));}
-    public NBTValue get(final String key) throws NBTParsingException {return values.get(new NBTString(key));}
+    /**
+     * Maps the value to the key.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input is not a valid key.
+     */
+    public NBTObject set(final Sequence key,final NBTValue value) throws NBTParsingException {
+        return set(new NBTString(key),value);
+    }
+    /**
+     * Maps the value to the key.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NBTParsingException The input is not a valid key.
+     */
+    public NBTObject set(final String key,final NBTValue value) throws NBTParsingException {
+        return set(new NBTString(key),value);
+    }
+    /**
+     * Adds an entry.
+     * 
+     * @return <code>this</code>
+     * 
+     * @throws NullPointerException The entry is <code>null</code>.
+     */
+    public NBTObject set(final NBTTag entry) throws NullPointerException {values.put(entry.key,entry.value()); return this;}
     
-    @Override public NBTValue remove(final NBTString key) {return values.remove(key);}
-    public NBTValue remove(final Sequence key) throws NBTParsingException {return values.remove(new NBTString(key));}
-    public NBTValue remove(final String key) throws NBTParsingException {return values.remove(new NBTString(key));}
+    @Override public NBTValue get(final NBTString key) throws NullPointerException {return values.get(key);}
+    /**
+     * @return The value associated with the key.
+     * 
+     * @throws NBTParsingException The input is not a valid {@linkplain NBTString}.
+     */
+    public NBTValue get(final Sequence key) throws NBTParsingException {return get(new NBTString(key));}
+    /**
+     * @return The value associated with the key.
+     * 
+     * @throws NBTParsingException The input is not a valid {@linkplain NBTString}.
+     */
+    public NBTValue get(final String key) throws NBTParsingException {return get(new NBTString(key));}
+    
+    @Override public NBTValue remove(final NBTString key) throws NullPointerException {return values.remove(key);}
+    /**
+     * @return The value associated with the key.
+     * 
+     * @throws NBTParsingException The input is not a valid {@linkplain NBTString}.
+     */
+    public NBTValue remove(final Sequence key) throws NBTParsingException {return remove(new NBTString(key));}
+    /**
+     * @return The value associated with the key.
+     * 
+     * @throws NBTParsingException The input is not a valid {@linkplain NBTString}.
+     */
+    public NBTValue remove(final String key) throws NBTParsingException {return remove(new NBTString(key));}
     
     private static class NBTObjectIterator implements Iterator<NBTTag> {
         private final Iterator<Entry<NBTString,NBTValue>> i;
@@ -129,7 +198,10 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
         @Override
         public NBTTag next() {
             final Entry<NBTString,NBTValue> e = i.next();
-            return new NBTTag(e.getKey(),e.getValue());
+            try {return new NBTTag(e.getKey(),e.getValue());}
+            catch(final NBTParsingException x) {}
+            // No errors should get thrown by the tag constructor.
+            return null;
         }
     }
     @Override public Iterator<NBTTag> iterator() {return new NBTObjectIterator(values.entrySet().iterator());}
@@ -154,7 +226,7 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
      * 
      * @return An {@linkplain NBTObject}.
      * 
-     * @throws NBTParsingException If the iterator cannot find a valid object.
+     * @throws NBTParsingException The iterator cannot find a valid object.
      */
     public static NBTObject parse(final SequenceIterator i) throws NBTParsingException {
         final NBTObject out = new NBTObject();
@@ -189,6 +261,18 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
         // If hasNext() fails, then no closing character was found.
         throw new NBTParsingException("Missing closing character '%c'".formatted(CLOSE),i);
     }
+    /**
+     * @param i          A {@linkplain SequenceIterator} which points to the
+     *                   position just before the opening brace.
+     * @param terminator A character which marks the end of a structure.
+     *                   <code>null</code> indicates the end of the sequence.
+     * @param commas     <code>true</code> iff commas are allowed to terminate a
+     *                   value.
+     * 
+     * @return The appropriate {@linkplain NBTNumber}.
+     * 
+     * @throws NBTParsingException The iterator cannot find a valid number.
+     */
     public static NBTObject parse(final SequenceIterator i,
                                   final Character terminator,
                                   final boolean commas)
@@ -200,6 +284,11 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
         return out;
     }
     
+    /**
+     * Reads an object from a file.
+     * 
+     * @throws NBTException The file could not be read or the object is invalid.
+     */
     public static NBTObject read(final File f) throws NBTException {
         try(
             final DataInputStream in = new DataInputStream(
@@ -209,11 +298,7 @@ public class NBTObject extends NBTCollection<NBTString,NBTTag> {
                     )
                 )
             )
-        ) {
-            
-            return new NBTObject(in);
-        } catch(final IOException e) {
-            throw new NBTException("Error reading object from file.",e);
-        }
+        ) {return new NBTObject(in);}
+        catch(final IOException e) {throw new NBTException("Error reading object from file.",e);}
     }
 }

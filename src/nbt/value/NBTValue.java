@@ -8,8 +8,19 @@ import nbt.value.collection.NBTObject;
 import nbt.value.number.NBTNumber;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
+import util.string.outline.Segment;
+import util.string.outline.ValueSegment;
 
+/**
+ * A typed {@linkplain NBT} value.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public abstract class NBTValue extends NBT {
+    /**@return The {@linkplain ValueType} associated with this NBT value.*/
+    public abstract ValueType type();
+    
     /**
      * Constructs a value with default minimalism.
      * 
@@ -32,9 +43,7 @@ public abstract class NBTValue extends NBT {
     
     /**@return A representation of this NBT as a character sequence.*/
     public Sequence toSequence() {return minimal? minimal() : complete();}
-    
-    /**@return The {@linkplain ValueType} associated with this NBT value.*/
-    public abstract ValueType type();
+    @Override public Segment toSegment() {return new ValueSegment(toSequence());}
     
     /**@see ValueType#convert(NBTValue,ValueType)*/
     public NBTValue convertTo(final ValueType type)
@@ -55,7 +64,7 @@ public abstract class NBTValue extends NBT {
      * 
      * @return The appropriate {@linkplain NBTValue}.
      * 
-     * @throws NBTParsingException If the iterator cannot find a valid value.
+     * @throws NBTParsingException The iterator cannot find a valid value.
      */
     public static NBTValue parse(final SequenceIterator i,
                                  final Character terminator,
@@ -87,7 +96,7 @@ public abstract class NBTValue extends NBT {
      *                   
      * @return The appropriate {@linkplain NBTValue}.
      *                   
-     * @throws NBTParsingException If the iterator cannot find a valid value.
+     * @throws NBTParsingException The iterator cannot find a valid value.
      */
     public static NBTValue parseNotString(final SequenceIterator i,
                                           final Character terminator,

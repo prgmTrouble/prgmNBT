@@ -10,7 +10,7 @@ import settings.Version;
 /**
  * A 32-bit floating-point {@linkplain NBTNumber}.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public class NBTFloat extends NBTFP {
@@ -34,25 +34,25 @@ public class NBTFloat extends NBTFP {
      * Creates a float value of {@linkplain #GLOBAL_DEFAULT} with default
      * minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTFloat() {super(GLOBAL_DEFAULT);}
     /**
      * Creates a float value of {@linkplain #GLOBAL_DEFAULT}.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTFloat(final boolean minimal) {super(GLOBAL_DEFAULT,minimal);}
     /**
      * Creates a float value with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
      */
     public NBTFloat(final float value) {super(value);}
     /**
      * Creates a float value.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
      */
     public NBTFloat(final float value,final boolean minimal) {super(value,minimal);}
     /**Reads a float value.*/

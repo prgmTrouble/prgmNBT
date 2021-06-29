@@ -14,7 +14,7 @@ import util.string.Sequence.SequenceIterator;
 /**
  * An {@linkplain NBTArray} which holds primitive values.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public abstract class NBTPrimitiveArray extends NBTArray {
@@ -36,7 +36,9 @@ public abstract class NBTPrimitiveArray extends NBTArray {
     /**
      * Creates an empty primitive array with default minimalism.
      * 
-     * @see {@linkplain NBTValue#NBTValue()}
+     * @see NBTValue#NBTValue()
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     protected NBTPrimitiveArray(final ValueType subtype) throws NBTException {
         super();
@@ -45,7 +47,9 @@ public abstract class NBTPrimitiveArray extends NBTArray {
     /**
      * Creates an empty primitive array.
      * 
-     * @see {@linkplain NBTValue#NBTValue(boolean)}
+     * @see NBTValue#NBTValue(boolean)
+     * 
+     * @throws NBTException Primitive arrays are not enabled in this version.
      */
     protected NBTPrimitiveArray(final ValueType subtype,final boolean minimal) throws NBTException {
         super(minimal);
@@ -53,8 +57,9 @@ public abstract class NBTPrimitiveArray extends NBTArray {
     }
     
     @Override protected NBTValue adopt(final NBTValue element) throws NBTConversionException {return element.convertTo(subtype);}
+    /**@throws IllegalArgumentException The key is <code>null</code> or out of bounds.*/
     @Override
-    public NBTValue remove(final Integer key) {
+    public NBTValue remove(final Integer key) throws IllegalArgumentException {
         if(key == null || values.size() <= key || key < 0)
             throw new IllegalArgumentException(String.format(
                 "Cannot remove value at position %s (size = %d).",
@@ -70,7 +75,7 @@ public abstract class NBTPrimitiveArray extends NBTArray {
      * @return An {@linkplain NBTPrimitiveArray}, or an {@linkplain NBTArray} if no
      *         matching tokens are found.
      *         
-     * @throws NBTParsingException If the iterator cannot find a valid array.
+     * @throws NBTParsingException The iterator cannot find a valid array.
      */
     protected static NBTArray parseHeader(final SequenceIterator i) throws NBTParsingException {
         final Character c = ALLOW_TOKEN_WHITESPACE? i.nextNonWS()
@@ -101,26 +106,3 @@ public abstract class NBTPrimitiveArray extends NBTArray {
         return new NBTArray();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

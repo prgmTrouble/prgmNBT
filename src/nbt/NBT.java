@@ -10,11 +10,18 @@ import nbt.value.NBTString;
 import nbt.value.NBTValue;
 import nbt.value.collection.NBTTag;
 import settings.Settings;
+import settings.Version;
 import util.string.Indenter;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
 import util.string.Stringifiable;
 
+/**
+ * A {@linkplain Stringifiable} data format used by the game.
+ * 
+ * @author prgmTrouble
+ * @author AzureTriple
+ */
 public abstract class NBT implements Stringifiable {
     /**
      * <code>true</code> if this NBT should be represented minimally, where
@@ -52,9 +59,20 @@ public abstract class NBT implements Stringifiable {
      * @param i {@linkplain Indenter}
      * 
      * @return <code>i</code>.
+     * 
+     * @deprecated Use segments via the {@linkplain #toSegment()} method instead.
      */
+    @Deprecated
     public Indenter prettyPrint(final Indenter i) {return appendTo(i);}
     
+    /**
+     * Parses an arbitrary SNBT sequence using the parsing rules for the version
+     * {@linkplain Settings#version()}.
+     * 
+     * @throws NBTParsingException If the SNBT is invalid.
+     * 
+     * @see Version
+     */
     public static NBT parse(Sequence s) throws NBTParsingException {
         if(s == null || (s = s.stripLeading()).isEmpty())
             throw new NBTParsingException("Cannot parse an empty value.");
@@ -82,10 +100,26 @@ public abstract class NBT implements Stringifiable {
         return value;
     }
     
-    public static NBT parse(final SequenceIterator i,
-                            final Character terminator,
-                            final boolean commas)
-                            throws NBTParsingException {
+    /**
+     * Parses a single SNBT object.
+     * 
+     * @param i          The iterator which holds the SNBT data.
+     * @param terminator A character which must appear after the SNBT object. A
+     *                   <code>null</code> value specifies that the iterator must
+     *                   not have any remaining characters.
+     * @param commas     <code>true</code> iff the function should permit a comma if
+     *                   the last character was not the terminator.
+     *                   
+     * @throws NBTParsingException No valid SNBT object was found, the terminator
+     *                             argument was not null and the iterator ran out of
+     *                             characters before a matching character was found,
+     *                             or the terminator argument was null and the
+     *                             iterator found extra characters
+     */
+    protected static NBT parse(final SequenceIterator i,
+                               final Character terminator,
+                               final boolean commas)
+                               throws NBTParsingException {
         NBT value = null; final int start = i.index();
         NBTString k = null;
         
@@ -106,7 +140,18 @@ public abstract class NBT implements Stringifiable {
         return value;
     }
     
-    public static NBT parseSNBT(final Path path) throws NBTParsingException,IOException {
+    /**
+     * Parses a text file containing the nbt data.
+     * 
+     * @throws NBTParsingException If {@linkplain #parse(Sequence)} cannot parse the file's contents.
+     * @throws IOException If the file cannot be read.
+     * @throws OutOfMemoryError If the file is larger than 2GB.
+     * @throws SecurityException If the security manager forbids access.
+     * 
+     * @see #parse(Sequence)
+     */
+    public static NBT parseSNBT(final Path path) throws NBTParsingException,IOException,
+                                                        OutOfMemoryError,SecurityException {
         return NBT.parse(new Sequence(new String(Files.readAllBytes(path),StandardCharsets.UTF_8)));
     }
 }

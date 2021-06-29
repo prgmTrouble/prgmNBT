@@ -5,7 +5,7 @@ package settings;
  * ensure that the results model the original game's behavior as closely as
  * possible.
  * 
- * @author prgmTrouble 
+ * @author prgmTrouble
  * @author AzureTriple
  */
 public enum Version {
