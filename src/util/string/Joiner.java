@@ -97,4 +97,22 @@ public class Joiner extends SequenceQueue {
         wrapper[1].copyInto(out,cursor);
         return new Sequence(out);
     }
+    
+    /**@return All the sequences separated by the specified character.*/
+    public static Sequence join(final char separator,final Sequence...data) {
+        if(data == null || data.length == 0) return Sequence.EMPTY;
+        if(data.length == 1) return data[0];
+        final char[] buf;
+        {
+            int l0 = 0;
+            for(final Sequence s : data) l0 += s.length();
+            buf = new char[l0 - 1 + data.length];
+        }
+        int idx = data[0].copyInto(buf,0);
+        for(int i = 1;i < data.length;++i) {
+            buf[idx] = separator;
+            idx = data[i].copyInto(buf,++idx);
+        }
+        return new Sequence(buf);
+    }
 }

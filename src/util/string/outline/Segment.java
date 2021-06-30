@@ -1,6 +1,7 @@
 package util.string.outline;
 
 import settings.Settings;
+import util.string.Joiner;
 import util.string.Sequence;
 
 /**
@@ -44,4 +45,10 @@ public abstract class Segment {
     protected abstract boolean firstPass();
     /**Converts this segment into an array of lines.*/
     protected abstract Sequence[] secondPass();
+    
+    /**Converts this segment into a sequence.*/
+    public Sequence concat() {
+        firstPass();
+        return Joiner.join('\n',secondPass());
+    }
 }

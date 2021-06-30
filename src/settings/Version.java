@@ -53,10 +53,11 @@ public enum Version {
     public final String name;
     private Version(final String name) {this.name = name;}
     
-    public static boolean isAfter(final Version version) {return version.ordinal() < Settings.version.ordinal();}
-    public static boolean atLeast(final Version version) {return version.ordinal() <= Settings.version.ordinal();}
-    public static boolean atMost(final Version version) {return version.ordinal() >= Settings.version.ordinal();}
-    public static boolean isBefore(final Version version) {return version.ordinal() > Settings.version.ordinal();}
+    private static int current() {return Settings.version().ordinal();}
+    public static boolean isAfter(final Version version) {return version.ordinal() < current();}
+    public static boolean atLeast(final Version version) {return version.ordinal() <= current();}
+    public static boolean atMost(final Version version) {return version.ordinal() >= current();}
+    public static boolean isBefore(final Version version) {return version.ordinal() > current();}
     
     /**Returns a string in the format: <code>[version: &lt{@link #name}&gt]</code>*/
     @Override public String toString() {return new StringBuilder("[version: ").append(name).append(']').toString();}

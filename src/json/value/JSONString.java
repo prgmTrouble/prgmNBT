@@ -69,6 +69,7 @@ public class JSONString extends JSONValue {
     
     /**@return This string's value.*/
     public Sequence value() {return value;}
+    
     private static <V> V checkNN(final V v) throws JSONException {
         if(v == null) throw new JSONException("Cannot assign a null value.");
         return v;

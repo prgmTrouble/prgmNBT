@@ -5,8 +5,12 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.FileChannel;
 import json.exception.JSONException;
 import json.exception.JSONParsingException;
 import json.value.JSONNull;
@@ -163,5 +167,26 @@ public class JSONObject extends JSONCollection<JSONString,JSONTag> {
     public static JSONObject read(final File f) throws JSONException {
         try(final SequenceFileIterator i = new SequenceFileIterator(f)) {return parse(i);}
         catch(IOException|UncheckedIOException e) {throw new JSONException("Failed to read JSON from file.",e);}
+    }
+    /**
+     * Writes an object to a file.
+     * 
+     * @throws IOException       The file could not be written.
+     * @throws SecurityException The security manager denied access.
+     */
+    public void write(final File f) throws IOException,SecurityException {
+        try(final FileOutputStream os = new FileOutputStream(f)) {
+            final ByteBuffer bb;
+            {
+                System.gc();
+                final CharBuffer cb = CharBuffer.wrap(toSegment().concat());
+                (bb = ByteBuffer.allocateDirect(cb.capacity())).asCharBuffer().put(cb);
+            }
+            System.gc();
+            final FileChannel fc = os.getChannel();
+            fc.lock();
+            fc.write(bb);
+        }
+        System.gc();
     }
 }
