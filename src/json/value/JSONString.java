@@ -18,29 +18,38 @@ public class JSONString extends JSONValue {
     public static final ValueType TYPE = ValueType.STRING;
     @Override public ValueType type() {return TYPE;}
     
-    private Sequence value = Sequence.EMPTY;
+    private static final Sequence BLANK = new Sequence('"',2);
+    private Sequence value = BLANK;
     private boolean escapeUnicode = Settings.escapeUnicodeByDefault();
     
     /**Creates an empty string value.*/
     public JSONString() {super();}
     /**
-     * Creates a string value.
+     * Creates a string value. This function does not enforce quotes.
      * 
      * @throws JSONException The value is <code>null</code> or otherwise invalid.
      */
     public JSONString(final Sequence value) throws JSONException {super(); value(value);}
     /**
-     * Creates a string value.
+     * Creates a string value. This function does not enforce quotes.
      * 
      * @throws JSONException The value is <code>null</code> or otherwise invalid.
      */
     public JSONString(final char...value) throws JSONException {super(); value(value);}
     /**
-     * Creates a string value.
+     * Creates a string value. This function does not enforce quotes.
      * 
      * @throws JSONException The value is <code>null</code> or otherwise invalid.
      */
     public JSONString(final String value) throws JSONException {super(); value(value);}
+    /**
+     * Parses a string value. This function enforces quotes.
+     * 
+     * @throws JSONParsingException The input does not represent a valid JSON string.
+     */
+    public JSONString(final SequenceIterator i) throws JSONParsingException {
+        value = eatSequence(i,false,true);
+    }
     
     /**
      * @return <code>true</code> iff values larger than <code>'\u007F'</code> will
@@ -66,18 +75,19 @@ public class JSONString extends JSONValue {
     }
     private static final char toHexChar(int c) {return (char)((c &= 0xF) > 9? c - 10 + 'A' : ('0' + c));}
     private static Sequence eatSequence(final SequenceIterator i,
-                                        final Character terminator,
                                         final boolean escapeUnicode,
                                         final boolean checkQuotes)
-                                        throws JSONParsingException { //TODO test
-        final Character wrapper = i.skipWS();
-        if(wrapper == null) throw new JSONParsingException("Empty sequence",i);
-        i.mark();
-        if(checkQuotes && wrapper != '"')
-            throw new JSONParsingException(
-                "Invalid wrapper character '%c' ('\\u%04X')"
-                .formatted(wrapper,(int)wrapper),i
-            );
+                                        throws JSONParsingException {
+        {
+            final Character wrapper = i.skipWS();
+            if(wrapper == null) throw new JSONParsingException("Empty sequence",i);
+            i.mark();
+            if(checkQuotes && wrapper != '"')
+                throw new JSONParsingException(
+                    "Invalid wrapper character '%c' ('\\u%04X')"
+                    .formatted(wrapper,(int)wrapper),i
+                );
+        }
         if(!i.hasNext()) // Ensure that there are more characters.
             throw new JSONParsingException("Missing ending quote",i);
         final Stack<Integer> chars = new Stack<>(),indices = new Stack<>();
@@ -101,29 +111,27 @@ public class JSONString extends JSONValue {
                 
                 if(escaped) { // Skip escaped character.
                     // Check allowed single-character escape sequences.
-                    if(
-                        unicode != 4 && !(
-                            c == wrapper ||
-                            Sequence.isJavaEscape(c)
-                        )
-                    ) throw new JSONParsingException(
-                        "Invalid escape character '%c' ('\\u%04d')"
-                        .formatted(c,(int)c),i
-                    );
+                    if(unicode != 4 && !(c == '"' || Sequence.isJavaEscape(c)))
+                        throw new JSONParsingException(
+                            "Invalid escape character '%c' ('\\u%04d')"
+                            .formatted(c,(int)c),i
+                        );
                     escaped = false;
                 } else if(escapeUnicode && c > '\u007F') { // Check for non-ASCII.
                     chars.push((int)c);
                     indices.push(i.index());
-                } else if(!(escaped = c == '\\') && checkQuotes && c == wrapper)
+                } else if(!(escaped = c == '\\') && checkQuotes && c == '"')
                     break; // Break on checked un-escaped quotes.
                 // Ignore everything else.
                 c = i.next(); // Should never return null because of while condition.
             }
         }
-        boolean flag = false;
-        if(wrapper == '"' && i.peek() == wrapper) i.next();
-        else if(checkQuotes) throw new JSONParsingException("Missing ending quote",i);
-        else flag = true;
+        if(checkQuotes) {
+            if(i.peek() != '"')
+                throw new JSONParsingException("Missing ending quote",i);
+            // Advance past quote.
+            i.next();
+        }
         Sequence v = i.subSequence();
         if(escapeUnicode && chars.size() != 0) {
             // Buffer size is the number of characters in the original sequence, plus 5
@@ -157,22 +165,21 @@ public class JSONString extends JSONValue {
             v.subSequence(0,prev).copyInto(buf,0);
             v = new Sequence(buf);
         }
-        return flag? v.quoteAndEscape('"') : v;
+        return checkQuotes? v : v.quoteAndEscape('"');
     }
     /**Ensures that the input sequence is valid and unwraps if necessary.*/
     private static Sequence validate(Sequence value,final boolean escapeUnicode) throws JSONParsingException {
         final SequenceIterator i = value.iterator();
-        value = eatSequence(i,null,escapeUnicode,false);
+        value = eatSequence(i,escapeUnicode,false);
         if(i.hasNext()) throw new JSONParsingException("Trailing data found",i);
-        return value.isWrappedIn('"')? value.unwrapAndUnescape()
-                                     : value;
+        return value;
     }
     private JSONString internalSetV(final Sequence value) throws JSONException {
         this.value = validate(value,escapeUnicode);
         return this;
     }
     /**
-     * @param value This string's value.
+     * @param value This string's value. Quotes are not enforced.
      * 
      * @return <code>this</code>
      * 
@@ -182,7 +189,7 @@ public class JSONString extends JSONValue {
         return internalSetV(checkNN(value));
     }
     /**
-     * @param value This string's value.
+     * @param value This string's value. Quotes are not enforced.
      * 
      * @return <code>this</code>
      * 
@@ -192,7 +199,7 @@ public class JSONString extends JSONValue {
         return internalSetV(new Sequence(checkNN(value)));
     }
     /**
-     * @param value This string's value.
+     * @param value This string's value. Quotes are not enforced.
      * 
      * @return <code>this</code>
      * 
@@ -204,5 +211,31 @@ public class JSONString extends JSONValue {
     
     @Override public Sequence toSequence() {return value;}
     
-    //TODO parsing (use eatSequence with checkQuotes true)
+    /**
+     * @param i          A {@linkplain SequenceIterator} which points to the
+     *                   position just before the string sequence. Quotes are
+     *                   enforced.
+     * @param terminator A character which marks the end of a structure.
+     *                   <code>null</code> indicates the end of the sequence.
+     * @param commas     <code>true</code> iff commas are allowed to terminate a
+     *                   value.
+     * 
+     * @return The appropriate {@linkplain JSONNumber}.
+     * 
+     * @throws JSONParsingException The iterator cannot find a valid number.
+     */
+    public static JSONString parse(final SequenceIterator i,
+                                   final Character terminator,
+                                   final boolean commas) 
+                                   throws JSONParsingException {
+        final Sequence str = eatSequence(i,false,true);
+        final Character c = i.skipWS();
+        if(!(commas && c == ',') && c != terminator)
+            throw new JSONParsingException("string",i,terminator,commas,c);
+        // Bypass constructor checks.
+        final JSONString s = new JSONString();
+        s.value = str.isWrappedIn('"')? str.unwrapAndUnescape()
+                                      : str;
+        return s;
+    }
 }

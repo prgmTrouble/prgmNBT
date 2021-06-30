@@ -2,6 +2,13 @@ package util.string;
 
 import java.util.Iterator;
 
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import nbt.value.NBTString;
 import nbt.value.collection.NBTArray;
 import nbt.value.collection.NBTObject;
@@ -179,10 +186,58 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
     @Override public char charAt(final int index) throws IndexOutOfBoundsException {return data[idx(index)];}
     
     /**A basic iterator which traverses a {@linkplain Sequence}.*/
-    public abstract class SequenceIterator implements Iterator<Character> {
+    public static interface SequenceIterator extends Iterator<Character> {
+        /**
+         * @return The value at the cursor without advancing, or <code>null</code> if
+         *         {@linkplain SequenceIterator#next()} hasn't been called for the first
+         *         time.
+         */
+        public Character peek();
+        /**
+         * @return The value at the cursor's position offset by the argument without
+         *         advancing, or <code>null</code> if
+         *         {@linkplain SequenceIterator#next()} hasn't been called for the first
+         *         time.
+         */
+        public Character peek(final int offset);
+        /**
+         * @return The next non-whitespace character without advancing, or
+         *         <code>null</code> if the end is reached.
+         */
+        public Character peekNextNonWS();
+        /**
+         * @return The index of the character last returned by
+         *         {@linkplain SequenceIterator#next()}, adjusted to the current
+         *         sequence's range.
+         */
+        public int index();
+        /**@return The next non-whitespace character, or <code>null</code> if the end is reached.*/
+        public Character nextNonWS();
+        
+        /**@return The closest non-whitespace character, or <code>null</code> if the end is reached.*/
+        public Character skipWS();
+        /**@return The sequence being iterated over.*/
+        public Sequence getParent();
+        /**@return Saves the current position.*/
+        public void mark();
+        /**@return Saves the current position offset by the argument.*/
+        public void mark(final int offset);
+        /**@return The sub-sequence between the first marked position to the current index.*/
+        public Sequence subSequence();
+        /**Sets the cursor to the specified position.*/
+        public SequenceIterator jumpTo(final int index);
+        /**Offsets the current position.*/
+        public SequenceIterator jumpOffset(final int offset);
+    }
+    /**An abstract base class for directionless traversal over a known sequence.*/
+    private static abstract class SI implements SequenceIterator {
         protected int cursor;
         protected int mark;
-        protected SequenceIterator(final int begin) {mark = cursor = begin;}
+        protected Sequence s;
+        protected SI(final int begin,final Sequence s) {
+            mark = cursor = begin;
+            this.s = s;
+        }
         /**
          * @return The value at the cursor without advancing, or <code>null</code> if
          *         {@linkplain SequenceIterator#next()} hasn't been called for the first
@@ -206,7 +261,7 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
          *         {@linkplain SequenceIterator#next()}, adjusted to the current
          *         sequence's range.
          */
-        public int index() {return cursor - start;}
+        public int index() {return cursor - s.start;}
         /**@return The next non-whitespace character, or <code>null</code> if the end is reached.*/
         public abstract Character nextNonWS();
         
@@ -216,32 +271,34 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         public Character skipWS() {
             if(rangeCheck()) return null;
             advanceFirst();
-            if(!Character.isWhitespace(data[cursor])) return data[cursor];
+            if(!Character.isWhitespace(s.data[cursor])) return s.data[cursor];
             return nextNonWS();
         }
         /**@return The sequence being iterated over.*/
-        public Sequence getParent() {return Sequence.this;}
+        public Sequence getParent() {return s;}
         /**@return Saves the current position.*/
         public void mark() {mark = cursor;}
-        protected int offset(final int offset) {return Math.max(Math.min(cursor + offset,end),start);}
+        protected int offset(final int offset) {return Math.max(Math.min(cursor + offset,s.end),s.start);}
         /**@return Saves the current position offset by the argument.*/
         public void mark(final int offset) {mark = offset(offset);}
         /**@return The sub-sequence between the first marked position to the current index.*/
         public abstract Sequence subSequence();
         /**Sets the cursor to the specified position.*/
-        public SequenceIterator jumpTo(final int index) {cursor = idx(index); return this;}
+        public SequenceIterator jumpTo(final int index) {cursor = s.idx(index); return this;}
         /**Offsets the current position.*/
         public SequenceIterator jumpOffset(final int offset) {cursor += offset; return this;}
     }
     /**A {@linkplain SequenceIterator} which iterates from start to end.*/
-    public class ForwardSequenceIterator extends SequenceIterator {
-        private ForwardSequenceIterator() {super(start - 1);}
+    public class ForwardSequenceIterator extends SI {
+        private ForwardSequenceIterator() {super(start - 1,Sequence.this);}
         @Override public boolean hasNext() {return cursor < end - 1;}
         @Override public Character next() {return ++cursor < end? data[cursor] : null;}
         @Override public Character peek() {return cursor < start || cursor >= end? null : data[cursor];}
         @Override public Character peek(final int offset) {return cursor < start? null : data[offset(offset)];}
-        @Override protected boolean rangeCheck() {return cursor >= end;}
-        @Override protected void advanceFirst() {if(cursor == start - 1) ++cursor;}
+        @Override
+        public boolean rangeCheck() {return cursor >= end;}
+        @Override
+        public void advanceFirst() {if(cursor == start - 1) ++cursor;}
         @Override
         public Character peekNextNonWS() {
             int temp = cursor;
@@ -265,14 +322,16 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
      */
     @Override public ForwardSequenceIterator iterator() {return new ForwardSequenceIterator();}
     /**A {@linkplain SequenceIterator} which iterates from end to start.*/
-    public class ReverseSequenceIterator extends SequenceIterator {
-        private ReverseSequenceIterator() {super(end);}
+    public class ReverseSequenceIterator extends SI {
+        private ReverseSequenceIterator() {super(end,Sequence.this);}
         @Override public boolean hasNext() {return cursor > start;}
         @Override public Character next() {return --cursor >= start? data[cursor] : null;}
         @Override public Character peek() {return cursor == end? null : data[cursor];}
         @Override public Character peek(final int offset) {return cursor == end? null : data[offset(offset)];}
-        @Override protected boolean rangeCheck() {return cursor < start;}
-        @Override protected void advanceFirst() {if(cursor == end) --cursor;}
+        @Override
+        public boolean rangeCheck() {return cursor < start;}
+        @Override
+        public void advanceFirst() {if(cursor == end) --cursor;}
         @Override
         public Character peekNextNonWS() {
             int temp = cursor;
@@ -821,6 +880,160 @@ public class Sequence implements CharSequence,Comparable<Sequence>,Iterable<Char
         ts = 0;
         for(final Sequence s : sequences) ts = s.copyInto(out,ts);
         return new Sequence(out);
+    }
+    
+    /**A {@linkplain SequenceIterator} which reads directly from a file.*/
+    public static class SequenceFileIterator implements SequenceIterator,AutoCloseable {
+        private static void ioe(final IOException e) {throw new UncheckedIOException(e);}
+        
+        private final RandomAccessFile in;
+        private long mark = 0L;
+        
+        /**
+         * Creates a new sequence file iterator.
+         * 
+         * @throws IOException The file is too large (<code>f.length() >= 2^32</code>)
+         *                     or could not be opened.
+         */
+        public SequenceFileIterator(final File f) throws IOException {
+            if(f.length() > Integer.MAX_VALUE)
+                throw new IOException(
+                    "File is too large (%d >= 1 << 31)."
+                    .formatted(f.length())
+                );
+            if((f.length() & 1) != 0)
+                throw new IOException("File has an odd number of bytes.");
+            in = new RandomAccessFile(f,"r");
+            in.getChannel().lock();
+        }
+        
+        @Override
+        public boolean hasNext() {
+            try {return in.getFilePointer() < in.length();}
+            catch(final IOException e) {ioe(e);}
+            return false;
+        }
+        @Override
+        public Character next() {
+            if(hasNext()) {
+                try {return in.readChar();}
+                catch(final IOException e) {ioe(e);}
+            }
+            return null;
+        }
+        
+        @Override public Character peek() {return peek(0);}
+        @Override
+        public Character peek(final int offset) {
+            final long pos;
+            {
+                long p = 0;
+                try {p = in.getFilePointer();}
+                catch(final IOException e) {ioe(e);}
+                pos = p;
+            }
+            Character c = null;
+            try {in.seek(pos + 2 * offset); c = in.readChar();}
+            catch(final EOFException e) {} // EOF is acceptable.
+            catch(final IOException e) {ioe(e);}
+            try {in.seek(pos);} catch(final IOException e) {ioe(e);}
+            return c;
+        }
+        @Override
+        public Character peekNextNonWS() {
+            final long pos;
+            {
+                long p = 0;
+                try {p = in.getFilePointer();}
+                catch(final IOException e) {ioe(e);}
+                pos = p;
+            }
+            final Character c = nextNonWS();
+            try {in.seek(pos);} catch(final IOException e) {ioe(e);}
+            return c;
+        }
+        
+        @Override
+        public int index() {
+            try {return (int)(in.getFilePointer() / 2L);}
+            catch(final IOException e) {ioe(e);}
+            return Integer.MAX_VALUE;
+        }
+        
+        @Override public Character nextNonWS() {return next() == null? null : skipWS();}
+        @Override
+        public Character skipWS() {
+            Character c = null;
+            while((c = next()) != null && Character.isWhitespace(c));
+            return c;
+        }
+        
+        @Override
+        public Sequence getParent() {
+            final int l0,l1;
+            {
+                long nl = 0L;
+                try {nl = in.length();}
+                catch(final IOException e) {ioe(e);}
+                l0 = (int)nl;
+                l1 = (int)(nl >>> 1);
+            }
+            System.gc();
+            final char[] out = new char[l1];
+            {
+                final ByteBuffer bb = ByteBuffer.allocateDirect(l0);
+                try {in.getChannel().position(0L).read(bb);}
+                catch(final IOException e) {ioe(e);}
+                CharBuffer.wrap(out).put(bb.asCharBuffer());
+            }
+            System.gc();
+            return new Sequence(out);
+        }
+        
+        @Override
+        public void mark() {
+            try {mark = in.getFilePointer();}
+            catch(final IOException e) {ioe(e);}
+        }
+        @Override
+        public void mark(final int offset) {
+            mark();
+            mark += offset * 2L;
+        }
+        @Override
+        public Sequence subSequence() {
+            final long l;
+            {
+                long l2 = 0L;
+                try {l2 = in.length() - mark;}
+                catch(final IOException e) {ioe(e);}
+                l = l2;
+            }
+            System.gc();
+            final char[] out = new char[(int)(l >>> 1)];
+            {
+                final ByteBuffer bb = ByteBuffer.allocateDirect((int)l);
+                try {in.getChannel().position(mark).read(bb);}
+                catch(final IOException e) {ioe(e);}
+                CharBuffer.wrap(out).put(bb.asCharBuffer());
+            }
+            return new Sequence(out);
+        }
+
+        @Override
+        public SequenceFileIterator jumpTo(final int index) {
+            try {in.seek(index * 2);}
+            catch(final IOException e) {ioe(e);}
+            return this;
+        }
+        @Override
+        public SequenceFileIterator jumpOffset(final int offset) {
+            try {in.seek(in.getFilePointer() + offset * 2);}
+            catch(final IOException e) {ioe(e);}
+            return this;
+        }
+        
+        @Override public void close() throws IOException {in.close();}
     }
 }
 /*

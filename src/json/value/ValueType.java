@@ -3,10 +3,11 @@ package json.value;
 import json.exception.JSONConversionException;
 
 /**
- * 
- * 
+ * An enumeration of value types. In addition to identification, these also help
+ * with type conversions.
  * 
  * @author prgmTrouble
+ * @author AzureTriple
  */
 public enum ValueType {
     NULL,
@@ -27,7 +28,7 @@ public enum ValueType {
     public static JSONValue convert(final JSONValue value,
                                     final ValueType target)
                                     throws JSONConversionException {
-        //TODO
-        return null;
+        return (value == null? JSONNull.INSTANCE : value)
+            .convertTo(target == null? NULL : target);
     }
 }

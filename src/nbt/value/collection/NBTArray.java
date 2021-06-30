@@ -167,9 +167,9 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
      * 
      * @throws NBTConversionException The value could not be converted.
      */
-    public NBTArray add(NBTValue element) throws NBTConversionException {
-        if((element = adopt(element)) != null)
-            values.add(element);
+    public NBTArray add(NBTValue value) throws NBTConversionException {
+        if((value = adopt(value)) != null)
+            values.add(value);
         return this;
     }
     /**@throws IllegalArgumentException The key is <code>null</code> or out of bounds.*/
@@ -291,7 +291,7 @@ public class NBTArray extends NBTCollection<Integer,NBTValue> {
             );
         final Character c = i.nextNonWS();
         if(!(commas && c == ',') && c != terminator)
-            throw new NBTParsingException("Trailing data",i);
+            throw new NBTParsingException("array",i,terminator,commas,c);
         return arr;
     }
 }

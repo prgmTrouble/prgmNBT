@@ -11,7 +11,6 @@ import nbt.value.NBTValue;
 import nbt.value.collection.NBTTag;
 import settings.Settings;
 import settings.Version;
-import util.string.Indenter;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
 import util.string.Stringifiable;
@@ -53,19 +52,6 @@ public abstract class NBT implements Stringifiable {
     @Override public String toString() {return toSequence().toString();}
     
     /**
-     * Breaks up the string representation into mutiple lines where necessary using
-     * the appropriate indentation.
-     * 
-     * @param i {@linkplain Indenter}
-     * 
-     * @return <code>i</code>.
-     * 
-     * @deprecated Use segments via the {@linkplain #toSegment()} method instead.
-     */
-    @Deprecated
-    public Indenter prettyPrint(final Indenter i) {return appendTo(i);}
-    
-    /**
      * Parses an arbitrary SNBT sequence using the parsing rules for the version
      * {@linkplain Settings#version()}.
      * 
@@ -75,7 +61,7 @@ public abstract class NBT implements Stringifiable {
      */
     public static NBT parse(Sequence s) throws NBTParsingException {
         if(s == null || (s = s.stripLeading()).isEmpty())
-            throw new NBTParsingException("Cannot parse an empty value.");
+            throw new NBTParsingException("Cannot parse an empty sequence.");
         SequenceIterator i = s.iterator();
         NBT value;
         NBTString k = null;
@@ -152,6 +138,6 @@ public abstract class NBT implements Stringifiable {
      */
     public static NBT parseSNBT(final Path path) throws NBTParsingException,IOException,
                                                         OutOfMemoryError,SecurityException {
-        return NBT.parse(new Sequence(new String(Files.readAllBytes(path),StandardCharsets.UTF_8)));
+        return parse(new Sequence(new String(Files.readAllBytes(path),StandardCharsets.UTF_8)));
     }
 }

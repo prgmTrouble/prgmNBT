@@ -101,6 +101,8 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param value Initial value.
      * 
      * @see NBTValue#NBTValue()
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
      */
     public NBTString(final Sequence value) throws NBTParsingException {super(); setValue(value);}
     /**
@@ -110,6 +112,8 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param minimal {@linkplain NBTValue#minimal}
      * 
      * @see NBTValue#NBTValue(boolean)
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
      */
     public NBTString(final Sequence value,final boolean minimal) throws NBTParsingException {super(minimal); setValue(value);}
     /**
@@ -118,6 +122,8 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param value Initial value.
      * 
      * @see NBTValue#NBTValue()
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
      */
     public NBTString(final String value) throws NBTParsingException {super(); setValue(value);}
     /**
@@ -127,16 +133,29 @@ public class NBTString extends NBTValue implements Comparable<NBTString> {
      * @param minimal {@linkplain NBTValue#minimal}
      * 
      * @see NBTValue#NBTValue(boolean)
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
      */
     public NBTString(final String value,final boolean minimal) throws NBTParsingException {super(minimal); setValue(value);}
-    /**Reads a string value.*/
-    public NBTString(final DataInput in) throws IOException {value = new Sequence(in.readUTF());}
-    /**Writes this string value.*/
+    /**
+     * Reads a string value.
+     * 
+     * @throws IOException The value could not be read.
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
+     */
+    public NBTString(final DataInput in) throws IOException,NBTParsingException {super(); setValue(in.readUTF());}
+    /**
+     * Writes this string value.
+     * 
+     * @throws IOException The string could not be written.
+     */
     @Override
     public void write(final DataOutput out) throws IOException {out.writeUTF(value.toString());}
     /**
      * Parses a string value. The minimalism is set to <code>true</code> if the
      * string is wrapped.
+     * 
+     * @throws NBTParsingException The input does not represent a valid SNBT string.
      */
     public NBTString(final SequenceIterator i) throws NBTParsingException {
         value = eatSequence(i,null);

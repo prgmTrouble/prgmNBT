@@ -96,14 +96,14 @@ public abstract class NBTValue extends NBT {
      *                   
      * @return The appropriate {@linkplain NBTValue}.
      *                   
-     * @throws NBTParsingException The iterator cannot find a valid value.
+     * @throws NBTParsingException The iterator cannot find a valid non-string value.
      */
     public static NBTValue parseNotString(final SequenceIterator i,
                                           final Character terminator,
                                           final boolean commas)
                                           throws NBTParsingException {
         return switch(i.peek()) {
-            case 't','f' -> NBTBool.parse(i,terminator,commas);
+            case 't','f','T','F' -> NBTBool.parse(i,terminator,commas);
             case '{' -> NBTObject.parse(i,terminator,commas);
             case '[' -> NBTArray.parse(i,terminator,commas);
             case '+','-','.','0','1','2','3',

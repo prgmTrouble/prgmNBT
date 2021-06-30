@@ -11,23 +11,6 @@ import util.string.Sequence.SequenceIterator;
  * @author AzureTriple
  */
 public abstract class NBTFP extends NBTNumber {
-    /**An enumeration of characters which break up a floating-point string.*/
-    public static enum Delimiter {
-        fraction('.'),
-        exponent('e','E');
-        
-        private final char[] delimiters;
-        private Delimiter(final char...c) {delimiters = c;}
-        
-        /**@return <code>true</code> iff the character is an instance of this delimiter.*/
-        public boolean matches(final char c) {
-            for(final char d : delimiters) if(c == d) return true;
-            return false;
-        }
-        /**@return The default character representing this delimiter.*/
-        public char get() {return delimiters[0];}
-    }
-    
     /**
      * Creates a floating-point value with default minimalism.
      * 

@@ -12,6 +12,7 @@ import nbt.value.number.NBTLong;
 import nbt.value.number.NBTShort;
 import settings.Version;
 import util.string.Sequence;
+import util.string.Sequence.SequenceIterator;
 
 /**
  * A {@linkplain NBTValue} holding a boolean.
@@ -138,5 +139,45 @@ public class NBTBool extends NBTByte {
             };
         } catch(final NBTConversionException e) {throw e;}
         catch(final NBTParsingException e) {throw new NBTConversionException(TYPE,type,e);}
+    }
+    
+    /**
+     * @param i          A {@linkplain SequenceIterator} which points to the
+     *                   position just before the boolean sequence.
+     * @param terminator A character which marks the end of a structure.
+     *                   <code>null</code> indicates the end of the sequence.
+     * @param commas     <code>true</code> iff commas are allowed to terminate a
+     *                   value.
+     * 
+     * @return The appropriate {@linkplain NBTBool}.
+     * 
+     * @throws NBTParsingException The iterator cannot find a valid boolean.
+     * 
+     * @implNote This function does not consider numeric values. These should be
+     *           handled by {@linkplain NBTByte}.
+     */
+    public static NBTBool parse(final SequenceIterator i,
+                                final Character terminator,
+                                final boolean commas)
+                                throws NBTParsingException {
+        final boolean parity = switch(i.peek()) {
+            case 't','T' -> true;
+            case 'f','F' -> false;
+            default -> throw new NBTParsingException(
+                "Invalid boolean character '%c' ('\\u%04X')"
+                .formatted(i.peek(),(int)i.peek()),i
+            );
+        };
+        final SequenceIterator match = (parity? TRUE_SEQUENCE : FALSE_SEQUENCE).iterator();
+        while(match.hasNext())
+            if(match.next().charValue() != Character.toLowerCase(i.next()))
+                throw new NBTParsingException(
+                    "Invalid boolean character '%c' ('\\u%04X')"
+                    .formatted(i.peek(),(int)i.peek()),i
+                );
+        final Character c = i.nextNonWS();
+        if(!(commas && c == ',') && c != terminator)
+            throw new NBTParsingException("boolean",i,terminator,commas,c);
+        return new NBTBool(parity);
     }
 }

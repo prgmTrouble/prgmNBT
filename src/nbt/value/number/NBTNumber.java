@@ -6,8 +6,8 @@ import nbt.value.NBTBool;
 import nbt.value.NBTString;
 import nbt.value.NBTValue;
 import nbt.value.ValueType;
-import nbt.value.number.NBTFP.Delimiter;
 import settings.Version;
+import util.string.FPDelimiter;
 import util.string.Sequence;
 import util.string.Sequence.SequenceIterator;
 
@@ -145,7 +145,7 @@ public abstract class NBTNumber extends NBTValue {
         
         // Check fractional part.
         final boolean hasFP;
-        if(hasFP = Delimiter.fraction.matches(next)) {
+        if(hasFP = FPDelimiter.fraction.matches(next)) {
             final int idx = i.index();
             next = eatDigits(i);
             
@@ -156,7 +156,7 @@ public abstract class NBTNumber extends NBTValue {
         }
         
         // Check exponent part.
-        if(Delimiter.exponent.matches(next)) {
+        if(FPDelimiter.exponent.matches(next)) {
             if(THE_WILD_WEST)
                 throw new NBTParsingException("Disallowed exponent part",i);
             // Check for leading exponent delimiter.
@@ -187,7 +187,7 @@ public abstract class NBTNumber extends NBTValue {
         
         // Send to float or integral child parsing routine.
         return isFP || NBTFP.isFPSuffix(next)
-                   ? NBTFP.parse(i,next)
-                   : NBTi32.parse(i.subSequence().iterator(),next);
+                     ? NBTFP.parse(i,next)
+                     : NBTi32.parse(i.subSequence().iterator(),next);
     }
 }
